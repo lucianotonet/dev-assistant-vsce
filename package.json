@@ -25,7 +25,7 @@
         {
           "id": "devAssistant",
           "title": "Dev Assistant",
-          "icon": "resources/dark-icon.svg"
+          "icon": "resources/dark-icon.png"
         }
       ]
     },
@@ -34,7 +34,7 @@
         {
           "id": "devAssistant",
           "name": "Dev Assistant Panel",
-          "icon": "resources/dark-icon.svg"
+          "icon": "resources/dark-icon.png"
         }
       ]
     }
