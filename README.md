@@ -1,71 +1,54 @@
-# dev-assistant README
+# Dev Assistant VSCode Extension
 
-This is the README for your extension "dev-assistant". After writing up a brief description, we recommend including the following sections.
+O Dev Assistant agora está disponível como uma extensão para o Visual Studio Code! 
+Esta extensão permite que você interaja com o Dev Assistant sem sair do VSCode.
 
-## Features
+## 🌟 Funcionalidades
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
+- **Interação via chat**: Permite que você interaja com o Dev Assistant diretamente no VSCode. #TODO: Adicionar interface após login
+- **Gerenciamento de Arquivos**: Permite a criação, renomeação, exclusão e movimentação de arquivos e pastas ao Dev Assistant.
+- **Controle de Versão Git**: Permite o Dev Assistant realizar os comandos básicos do Git.
+- **Execução de Comandos**: Permite que o Dev Assistant execute comandos no terminal do VSCode.
 
-For example if there is an image subfolder under your extension project workspace:
+## 🚀 Como Começar
 
-\!\[feature X\]\(images/feature-x.png\)
+1. Instale a extensão Dev Assistant do VSCode Marketplace.
+2. Depois de instalado, você verá um ícone do Dev Assistant na barra lateral. Clique nele para iniciar.
+3. Conecte-se ao Dev Assistant usando suas credenciais. #TODO: Adicionar funcionalidade de login.
+4. Instale o Dev Assistant Python Client no seu computador.
+5. Inicie o Dev Assistant Python Client e conecte-se ao Dev Assistant.
+6. Agora você pode interagir com o Dev Assistant diretamente no VSCode!
 
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
+## 📜 Requisitos
 
-## Requirements
+- Visual Studio Code
+- [Dev Assistant Client](https://github.com/lucianotonet/dev-assistant-client) instalado e configurado.
+- Assinatura ChatGPT Plus.
 
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
+## 🌱 Estágio Atual do Projeto
 
-## Extension Settings
+Este projeto está em seus estágios iniciais e ainda está moldando sua identidade. Embora tenhamos uma visão clara de algumas funcionalidades e objetivos, ainda há muito a ser explorado e decidido. Convidamos a comunidade a se juntar a nós nesta jornada para moldar o futuro do Dev Assistant. No entanto, é importante mencionar que, enquanto buscamos envolver a comunidade, também temos planos de monetizar certos aspectos do projeto para garantir sua sustentabilidade a longo prazo.
 
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
+## 🤝 Contribuindo
 
-For example:
+Contribuições são muito bem-vindas! Se você tem uma ideia para uma melhoria ou encontrou um bug, por favor, abra uma issue. Sinta-se à vontade para fazer fork do repositório e enviar um pull request se quiser contribuir com código. Junte-se ao nosso [Discord](https://discord.gg/vvcSby8f5) para discutir ideias, dar feedback e colaborar com outros membros da comunidade.
 
-This extension contributes the following settings:
+## 📄 Licença
 
-* `myExtension.enable`: Enable/disable this extension.
-* `myExtension.thing`: Set to `blah` to do something.
+O Dev Assistant VSCode Extension é um software de código aberto, licenciado sob a licença MIT.
 
-## Known Issues
+## 📞 Suporte
 
-Calling out known issues can help limit users opening duplicate issues against your extension.
+Se você encontrar algum problema ou tiver alguma dúvida, não hesite em abrir uma issue no GitHub ou nos contatar através do [Discord](https://discord.gg/vvcSby8f5). Estamos aqui para ajudar!
 
-## Release Notes
+## 🙏 Agradecimentos
 
-Users appreciate release notes as you update your extension.
+Um agradecimento especial a:
 
-### 1.0.0
+- Luciano T. pela iniciativa e desenvolvimento do projeto.
+- ChatGPT por fornecer uma plataforma incrível para interação.
+- GitHub Copilot por auxiliar no desenvolvimento e codificação.
 
-Initial release of ...
+## 🤖 Discord Bot
 
-### 1.0.1
-
-Fixed issue #.
-
-### 1.1.0
-
-Added features X, Y, and Z.
-
----
-
-## Following extension guidelines
-
-Ensure that you've read through the extensions guidelines and follow the best practices for creating your extension.
-
-* [Extension Guidelines](https://code.visualstudio.com/api/references/extension-guidelines)
-
-## Working with Markdown
-
-You can author your README using Visual Studio Code. Here are some useful editor keyboard shortcuts:
-
-* Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux).
-* Toggle preview (`Shift+Cmd+V` on macOS or `Shift+Ctrl+V` on Windows and Linux).
-* Press `Ctrl+Space` (Windows, Linux, macOS) to see a list of Markdown snippets.
-
-## For more information
-
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
-
-**Enjoy!**
+Temos um bot no Discord que pode ser encontrado [aqui](https://github.com/lucianotonet/dev-assistant-discord-bot). Estamos explorando maneiras de integrar e utilizar este bot para melhorar a experiência da comunidade. Se você tem ideias ou sugestões, adoraríamos ouvir!
