@@ -35,13 +35,13 @@ export function activate(context: vscode.ExtensionContext) {
 		panel.onDidChangeViewState(e => {
 			if (e.webviewPanel.active) {
 				panel.iconPath = {
-					light: vscode.Uri.file(context.asAbsolutePath('resources/icon.svg')),
-					dark: vscode.Uri.file(context.asAbsolutePath('resources/icon.svg'))
+					light: vscode.Uri.file(context.asAbsolutePath('resources/light-icon.svg')),
+					dark: vscode.Uri.file(context.asAbsolutePath('resources/dark-icon.svg'))
 				};
 			} else {
 				panel.iconPath = {
-					light: vscode.Uri.file(context.asAbsolutePath('resources/icon.svg')),
-					dark: vscode.Uri.file(context.asAbsolutePath('resources/icon.svg'))
+					light: vscode.Uri.file(context.asAbsolutePath('resources/light-icon.svg')),
+					dark: vscode.Uri.file(context.asAbsolutePath('resources/dark-icon.svg'))
 				};
 			}
 		});
