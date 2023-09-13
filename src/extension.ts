@@ -1,26 +1,74 @@
-// The module 'vscode' contains the VS Code extensibility API
-// Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
+import OpenAI from 'openai';
 
-// This method is called when your extension is activated
-// Your extension is activated the very first time the command is executed
+// let openaiApiKey = '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'; // Replace with your OpenAI API key
+
 export function activate(context: vscode.ExtensionContext) {
+	console.log('Extension Dev Assistant is now active!');
 
-	// Use the console to output diagnostic information (console.log) and errors (console.error)
-	// This line of code will only be executed once when your extension is activated
-	console.log('Congratulations, your extension "dev-assistant-ai" is now active!');
+	let disposable = vscode.commands.registerCommand('dev-assistant.chat', () => {
+		// Create and show a new webview panel
+		const panel = vscode.window.createWebviewPanel(
+			'devAssistant',
+			'Dev Assistant',
+			vscode.ViewColumn.Two, // Open the panel in the sidebar
+			{
+				enableScripts: true // Allow scripts in the webview
+			}
+		);
 
-	// The command has been defined in the package.json file
-	// Now provide the implementation of the command with registerCommand
-	// The commandId parameter must match the command field in package.json
-	let disposable = vscode.commands.registerCommand('dev-assistant-ai.helloWorld', () => {
-		// The code you place here will be executed every time your command is executed
-		// Display a message box to the user
-		vscode.window.showInformationMessage('Hello World from Dev Assistant AI!');
+		// Set the HTML content of the panel
+		panel.webview.html = `
+			<!DOCTYPE html>
+			<html>
+				<head>
+					<meta charset="UTF-8">
+					<title>Dev Assistant</title>
+				</head>
+				<body>
+					<h1>Welcome to the Dev Assistant!</h1>
+				</body>				
+			</html>
+		`;
+
+		// Set the icon for the primary sidebar
+		panel.onDidChangeViewState(e => {
+			if (e.webviewPanel.active) {
+				panel.iconPath = {
+					light: vscode.Uri.file(context.asAbsolutePath('resources/icon.svg')),
+					dark: vscode.Uri.file(context.asAbsolutePath('resources/icon.svg'))
+				};
+			} else {
+				panel.iconPath = {
+					light: vscode.Uri.file(context.asAbsolutePath('resources/icon.svg')),
+					dark: vscode.Uri.file(context.asAbsolutePath('resources/icon.svg'))
+				};
+			}
+		});
+
+		// Handle messages from the webview
+		panel.webview.onDidReceiveMessage(
+			message => {
+				switch (message.command) {
+					case 'alert':
+						vscode.window.showErrorMessage(message.text);
+						return;
+				}
+			}
+		);
 	});
+
+	// Register a data provider for the view
+	const dataProvider = {
+		getChildren: () => {
+			return ['Welcome to', 'Dev Assistant!'];
+		},
+		getTreeItem: (element: string | vscode.TreeItemLabel) => {
+			return new vscode.TreeItem(element);
+		}
+	};
+
+	vscode.window.registerTreeDataProvider('devAssistant', dataProvider);
 
 	context.subscriptions.push(disposable);
 }
-
-// This method is called when your extension is deactivated
-export function deactivate() {}
