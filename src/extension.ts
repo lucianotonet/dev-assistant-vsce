@@ -1,7 +1,4 @@
 import * as vscode from 'vscode';
-import OpenAI from 'openai';
-
-// let openaiApiKey = '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'; // Replace with your OpenAI API key
 
 export function activate(context: vscode.ExtensionContext) {
 	console.log('Extension Dev Assistant is now active!');
