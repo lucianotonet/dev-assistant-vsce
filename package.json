@@ -2,14 +2,15 @@
   "name": "dev-assistant-ai",
   "displayName": "Dev Assistant AI",
   "description": "",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "repository": {
     "type": "git",
     "url": "https://github.com/lucianotonet/dev-assistant-vsce.git"
   },
   "publisher": "lucianotonet",
   "engines": {
-    "vscode": "^1.82.0"
+    "vscode": "^1.80.0",
+    "cursor": "^0.10.4"
   },
   "categories": [
     "Other"
