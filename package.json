@@ -75,7 +75,7 @@
   },
   "husky": {
     "hooks": {
-      "pre-commit": "yarn version --patch && git add package.json"
+      "post-commit": "yarn version --patch && git add package.json"
     }
   }
 }
