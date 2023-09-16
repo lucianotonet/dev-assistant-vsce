@@ -2,7 +2,7 @@
   "name": "dev-assistant-ai",
   "displayName": "Dev Assistant AI",
   "description": "Let ChatGPT streamline your programming tasks!",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "icon": "resources/icon_nobg.png",
   "publisher": "lucianotonet",
   "engines": {
