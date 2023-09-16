@@ -46,6 +46,9 @@ jobs:
     - name: Install vsce
       run: yarn global add vsce
 
+    - name: Auto version bump
+      run: yarn version --patch --no-git-tag-version
+
     - name: Package extension
       run: vsce package
 
