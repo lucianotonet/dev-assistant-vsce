@@ -56,4 +56,10 @@ export class LoginViewHandler {
     private handleAblyMessage(message: any): void {
         console.log('Received message from Ably:', message);
     }
+
+    public handleLoginCommand(context: vscode.ExtensionContext) {
+        // Esta função deve lidar com o comando de login
+        // Deve autenticar o usuário e inicializar a conexão Ably Realtime
+        // Este é um espaço reservado para a implementação real
+    }
 }

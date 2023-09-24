@@ -1,9 +1,10 @@
 import * as vscode from "vscode";
 import { handleSplashCommand } from "./splashViewHandler";
-import { handleLoginCommand } from "./loginViewHandler";
+import { LoginViewHandler } from "./loginViewHandler";
 import { handleChatCommand } from "./chatViewHandler";
 
 export let extensionContext: vscode.ExtensionContext | undefined = undefined;
+let loginHandler = LoginViewHandler.getInstance();
 
 export async function activateExtension(context: vscode.ExtensionContext) {
     extensionContext = context;
@@ -15,7 +16,7 @@ export async function activateExtension(context: vscode.ExtensionContext) {
 
     // Register the login command
     let loginDisposable = vscode.commands.registerCommand('dev-assistant.login', () => {
-        handleLoginCommand(context);
+        loginHandler.handleLoginCommand(context);
     });
 
     // Register the chat command
