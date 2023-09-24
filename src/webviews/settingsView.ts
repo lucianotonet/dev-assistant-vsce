@@ -1,7 +1,8 @@
-export function getChatWebviewContent(): string {    
-    return `
-        <div class="w-full h-full flex items-center justify-center">
-            <h1>Settings</h1>
-        </div>
-    `;
+import * as fs from 'fs';
+import * as path from 'path';
+
+export function getSettingsWebviewContent(): string {
+    const htmlPath = path.join(__dirname, 'settingsView.html');
+    const htmlContent = fs.readFileSync(htmlPath, 'utf8');
+    return htmlContent;
 }

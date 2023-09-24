@@ -71,8 +71,7 @@
         {
           "id": "dev-assistant.settingsView",
           "name": "Settings",
-          "visibility": "collapsed",
-          "icon": "resources/dark-icon.png"
+          "visibility": "collapsed"
         }        
       ]
     }
