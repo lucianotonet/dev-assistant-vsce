@@ -58,8 +58,8 @@ export class LoginViewHandler {
     }
 
     public handleLoginCommand(context: vscode.ExtensionContext) {
-        // Esta função deve lidar com o comando de login
-        // Deve autenticar o usuário e inicializar a conexão Ably Realtime
-        // Este é um espaço reservado para a implementação real
+        // Implement authentication logic here
+        // After successful authentication, initialize Ably connection
+        this.initAbly();
     }
 }
