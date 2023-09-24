@@ -5,6 +5,7 @@ import Ably from 'ably';
 export class LoginViewHandler {
     private static instance: LoginViewHandler;
     private ablyRealtime: any;
+    private ablyChannel: any;
 
     private constructor() {}
 
@@ -16,25 +17,25 @@ export class LoginViewHandler {
     }
 
     public async getTokenRequest(): Promise<any> {
-        try {
-            const token = vscode.workspace.getConfiguration('devAssistant').get('token');
-            const response = await axios.post('https://devassistant.tonet.dev/api/ably-auth', {}, {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-            return response.data;
-        } catch (error) {
-            vscode.window.showErrorMessage('Failed to get Ably token request from server.');
-            return null;
-        }
+        // ... existing code ...
     }
 
     public async initAbly(): Promise<void> {
         const tokenRequest = await this.getTokenRequest();
         if (tokenRequest) {
             this.ablyRealtime = new Ably.Realtime({ tokenRequest });
+            this.ablyRealtime.connection.once('connected', () => {
+                this.ablyChannel = this.ablyRealtime.channels.get('private-user-channel');
+                this.ablyChannel.subscribe((message: any) => {
+                    this.handleAblyMessage(message);
+                });
+            });
         }
+    }
+
+    private handleAblyMessage(message: any): void {
+        // TODO: Process the received message
+        console.log('Received message from Ably:', message);
     }
 
     // ... rest of the code ...
