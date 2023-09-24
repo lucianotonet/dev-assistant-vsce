@@ -106,6 +106,7 @@
   },
   "dependencies": {
     "@types/chai": "^4.3.6",
+    "ably": "^1.2.44",
     "node-fetch": "^3.3.2",
     "node-machine-id": "^1.1.12",
     "openai": "^4.6.0",
