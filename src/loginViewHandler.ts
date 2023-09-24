@@ -1,13 +1,17 @@
 import * as vscode from 'vscode';
 import axios from 'axios';
-import Ably from 'ably';
+import * as Ably from 'ably';
+import { machineIdSync } from 'node-machine-id';
+import { API_URL } from './utils';
 
 export class LoginViewHandler {
     private static instance: LoginViewHandler;
     private ablyRealtime: any;
     private ablyChannel: any;
 
-    private constructor() {}
+    private constructor() {
+        this.initAbly();
+    }
 
     public static getInstance(): LoginViewHandler {
         if (!LoginViewHandler.instance) {
@@ -17,15 +21,31 @@ export class LoginViewHandler {
     }
 
     public async getTokenRequest(): Promise<any> {
-        // ... existing code ...
+        try {
+            const token = vscode.workspace.getConfiguration('devAssistant').get('token');
+            if (!token) {
+                vscode.window.showErrorMessage('Please login to DevAssistant first.');
+                return null;
+            }
+            const response = await axios.post(`${API_URL}/ably-auth`, {}, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            return response.data;
+        } catch (error) {
+            vscode.window.showErrorMessage('Failed to get Ably token request from server.');
+            return null;
+        }
     }
 
     public async initAbly(): Promise<void> {
         const tokenRequest = await this.getTokenRequest();
         if (tokenRequest) {
-            this.ablyRealtime = new Ably.Realtime({ tokenRequest });
+            this.ablyRealtime = new Ably.Realtime(tokenRequest);
             this.ablyRealtime.connection.once('connected', () => {
-                this.ablyChannel = this.ablyRealtime.channels.get('private-user-channel');
+                const deviceId = machineIdSync();
+                this.ablyChannel = this.ablyRealtime.channels.get(`private:dev-assistant-${deviceId}`);
                 this.ablyChannel.subscribe((message: any) => {
                     this.handleAblyMessage(message);
                 });
@@ -34,9 +54,6 @@ export class LoginViewHandler {
     }
 
     private handleAblyMessage(message: any): void {
-        // TODO: Process the received message
         console.log('Received message from Ably:', message);
     }
-
-    // ... rest of the code ...
 }
