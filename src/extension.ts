@@ -1,71 +1,66 @@
 import * as vscode from 'vscode';
+import { machineIdSync } from "node-machine-id";
+import { PostHog } from 'posthog-node';
 
-export function activate(context: vscode.ExtensionContext) {
-	console.log('Extension Dev Assistant is now active!');
+let client: PostHog | undefined = undefined;
 
-	let disposable = vscode.commands.registerCommand('dev-assistant.chat', () => {
-		// Create and show a new webview panel
-		const panel = vscode.window.createWebviewPanel(
-			'devAssistant',
-			'Dev Assistant',
-			vscode.ViewColumn.Two, // Open the panel in the sidebar
-			{
-				enableScripts: true // Allow scripts in the webview
-			}
+// Function to capture events with PostHog
+export async function capture(args: any) {
+	console.log("Capturing posthog event: ", args);
+	if (!client) {
+		// Initialize PostHog client
+		client = new PostHog(
+			'phc_C6OoC4aFJT5MPFaiPXn03FTPHlRZpm7wu4LFOf6GzNg',
+			{ host: 'https://app.posthog.com' }
 		);
+	}
+	
+	// Capture the event
+	client?.capture(args);
+}
 
-		// Set the HTML content of the panel
-		panel.webview.html = `
-			<!DOCTYPE html>
-			<html>
-				<head>
-					<meta charset="UTF-8">
-					<title>Dev Assistant</title>
-				</head>
-				<body>
-					<h1>Welcome to the Dev Assistant!</h1>
-				</body>				
-			</html>
-		`;
-
-		// Set the icon for the primary sidebar
-		panel.onDidChangeViewState(e => {
-			if (e.webviewPanel.active) {
-				panel.iconPath = {
-					light: vscode.Uri.file(context.asAbsolutePath('resources/light-icon.png')),
-					dark: vscode.Uri.file(context.asAbsolutePath('resources/dark-icon.png'))
-				};
-			} else {
-				panel.iconPath = {
-					light: vscode.Uri.file(context.asAbsolutePath('resources/light-icon.png')),
-					dark: vscode.Uri.file(context.asAbsolutePath('resources/dark-icon.png'))
-				};
-			}
+// Function to activate the extension
+export async function activate(context: vscode.ExtensionContext) {
+	if (!context.globalState.get("hasBeenInstalled")) {
+		context.globalState.update("hasBeenInstalled", true);
+		// Capture install event
+		capture({
+			distinctId: getUniqueId(),
+			event: "install",
+			properties: {
+				platform: process.platform,
+				arch: process.arch,
+				version: vscode.version,
+			},
 		});
+	}
 
-		// Handle messages from the webview
-		panel.webview.onDidReceiveMessage(
-			message => {
-				switch (message.command) {
-					case 'alert':
-						vscode.window.showErrorMessage(message.text);
-						return;
+	const { activateExtension } = await import("./activate");
+
+	try {
+		await activateExtension(context);
+	} catch (e) {
+		console.log("Error activating extension: ", e);
+		// Show error message and provide options to view logs or retry
+		vscode.window
+			.showInformationMessage(
+				"Error activating Dev Assistant AI extension.",
+				"View Logs",
+				"Retry"
+			)
+			.then((selection) => {
+				if (selection === "View Logs") {
+					vscode.commands.executeCommand("dev-assistant.viewLogs");
+				} else if (selection === "Retry") {
+					// Reload VS Code window
+					vscode.commands.executeCommand("workbench.action.reloadWindow");
 				}
-			}
-		);
-	});
+			});
+	}	
+}
 
-	// Register a data provider for the view
-	const dataProvider = {
-		getChildren: () => {
-			return ['Welcome to', 'Dev Assistant!'];
-		},
-		getTreeItem: (element: string | vscode.TreeItemLabel) => {
-			return new vscode.TreeItem(element);
-		}
-	};
-
-	vscode.window.registerTreeDataProvider('devAssistant', dataProvider);
-
-	context.subscriptions.push(disposable);
+// Function to get unique machine ID
+export function getUniqueId() {
+    const id = vscode.env.machineId;
+    return id !== "someValue.machineId" ? id : machineIdSync();
 }

@@ -6,39 +6,74 @@
   "icon": "resources/icon_nobg.png",
   "publisher": "lucianotonet",
   "engines": {
-    "vscode": "^1.80.0",
-    "cursor": "^0.10.4"
+    "vscode": "^1.80.0"
   },
   "categories": [
     "Other"
   ],
   "main": "./dist/extension.js",
   "activationEvents": [
-    "*"
+    "onStartupFinished"
   ],
   "contributes": {
+    "configuration": {
+      "title": "Dev Assistant AI",
+      "properties": {
+        "devAssistant.serverUrl": {
+          "type": "string",
+          "default": "https://devassistant.tonet.dev",
+          "description": "The URL of the Dev Assistant AI server. If you want to use an LLM hosted at a custom URL, please see https://devassistant.tonet.dev/docs/customization#change-the-default-llm. All other configuration can be done by using the '/config' slash command."
+        }
+      }
+    },
     "commands": [
       {
+        "command": "dev-assistant.splash",
+        "category": "Dev Assistant AI",
+        "title": "Open Splash"
+      },
+      {
         "command": "dev-assistant.chat",
-        "title": "Dev Assistant: Chat"
+        "category": "Dev Assistant AI",
+        "title": "Open Chat"
+      },
+      {
+        "command": "dev-assistant.login",
+        "category": "Dev Assistant AI",
+        "title": "Login"
+      },
+      {
+        "command": "dev-assistant.quickFix",
+        "category": "Dev Assistant AI",
+        "title": "Quick Fix with Dev Assistant AI"
       }
     ],
+    "keybindings": [],
+    "menus": {
+      "view/title": []
+    },
     "viewsContainers": {
       "activitybar": [
         {
-          "id": "devAssistant",
-          "title": "Dev Assistant",
+          "id": "devAssistantViewContainer",
+          "title": "Dev Assistant AI",
           "icon": "resources/dark-icon.png"
         }
       ]
     },
     "views": {
-      "devAssistant": [
+      "devAssistantViewContainer": [
         {
-          "id": "devAssistant",
-          "name": "Dev Assistant Panel",
+          "id": "dev-assistant.chatView",
+          "name": "Dev Assistant AI Chat",
+          "visibility": "visible"
+        },
+        {
+          "id": "dev-assistant.settingsView",
+          "name": "Settings",
+          "visibility": "collapsed",
           "icon": "resources/dark-icon.png"
-        }
+        }        
       ]
     }
   },
@@ -71,7 +106,11 @@
     "webpack-cli": "^5.0.1"
   },
   "dependencies": {
-    "openai": "^4.6.0"
+    "node-fetch": "^3.3.2",
+    "node-machine-id": "^1.1.12",
+    "openai": "^4.6.0",
+    "posthog-node": "^3.1.2",
+    "tailwindcss": "^3.3.3"
   },
   "husky": {
     "hooks": {
