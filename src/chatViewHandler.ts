@@ -13,4 +13,5 @@ export function handleChatCommand(context: vscode.ExtensionContext) {
 
     panel.webview.html = getChatWebviewContent();
     panel.iconPath = iconPath;
+    return panel;
 }
