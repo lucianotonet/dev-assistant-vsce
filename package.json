@@ -63,7 +63,7 @@
       ]
     },
     "views": {
-      "devAssistantViewContainer": [        
+      "devAssistantViewContainer": [
         {
           "id": "dev-assistant.chatView",
           "name": "Dev Assistant AI Chat",
@@ -85,15 +85,17 @@
     "compile-tests": "tsc -p . --outDir out",
     "watch-tests": "tsc -p . -w --outDir out",
     "pretest": "yarn run compile-tests && yarn run compile && yarn run lint",
+    "test": "node ./out/test/runTest.js",
+    "posttest": "yarn run clean-tests",
     "lint": "eslint src --ext ts",
-    "test": "node ./out/test/runTest.js"
+    "clean-tests": "rimraf out"
   },
   "devDependencies": {
     "@types/chai": "^4.3.6",
     "@types/glob": "^8.1.0",
     "@types/mocha": "^10.0.1",
     "@types/node": "16.x",
-    "@types/vscode": "^1.80.0",
+    "@types/vscode": "^1.82.0",
     "@typescript-eslint/eslint-plugin": "^5.56.0",
     "@typescript-eslint/parser": "^5.56.0",
     "@vscode/test-electron": "^2.3.0",
