@@ -1,14 +1,9 @@
 import * as vscode from "vscode";
-import { getSplashWebviewContent } from "./webviews/splashView";
+import { SplashView } from "./webviews/splashView";
 import { getChatWebviewContent } from "./webviews/chatView";
 
 export function showSplashWebview(iconPath: any) {
-    const panel = vscode.window.createWebviewPanel( 'dev-assistant.splashView', 'Welcome to Dev Assistant',
-        vscode.ViewColumn.Beside, { enableScripts: true }
-    );
-
-    panel.webview.html = getSplashWebviewContent();
-    panel.iconPath = iconPath;
+    SplashView.getWebviewContent(iconPath);
 }
 
 export function showChatWebview(iconPath: any) {
@@ -19,3 +14,4 @@ export function showChatWebview(iconPath: any) {
     panel.webview.html = getChatWebviewContent();
     panel.iconPath = iconPath;
 }
+

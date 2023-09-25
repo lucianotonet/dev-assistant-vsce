@@ -5,11 +5,7 @@ import { AuthHandler } from './authHandler';
 export function handleChatCommand(context: vscode.ExtensionContext) {
     const token = vscode.workspace.getConfiguration('devAssistant').get('token');
     if (!token) {
-        vscode.window.showErrorMessage('Please login to DevAssistant.', 'Login').then(selection => {
-            if (selection === 'Login') {
-                AuthHandler.getInstance().handleLoginCommand(context);
-            }
-        });
+        AuthHandler.getInstance().handleLoginCommand(context);
         return;
     }
 

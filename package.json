@@ -63,7 +63,7 @@
       ]
     },
     "views": {
-      "devAssistantViewContainer": [
+      "devAssistantViewContainer": [        
         {
           "id": "dev-assistant.chatView",
           "name": "Dev Assistant AI Chat",
