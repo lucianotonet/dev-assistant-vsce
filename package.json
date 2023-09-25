@@ -3,8 +3,9 @@
   "displayName": "Dev Assistant AI",
   "description": "Let ChatGPT streamline your programming tasks!",
   "version": "0.0.4",
-  "icon": "resources/icon_nobg.png",
+  "icon": "assets/img/icon_nobg.png",
   "publisher": "lucianotonet",
+  "license": "MIT",
   "engines": {
     "vscode": "^1.80.0"
   },
@@ -57,12 +58,12 @@
         {
           "id": "devAssistantViewContainer",
           "title": "Dev Assistant AI",
-          "icon": "resources/dark-icon.png"
+          "icon": "assets/img/dark-icon.png"
         }
       ]
     },
     "views": {
-      "devAssistantViewContainer": [
+      "devAssistantViewContainer": [        
         {
           "id": "dev-assistant.chatView",
           "name": "Dev Assistant AI Chat",
@@ -88,6 +89,7 @@
     "test": "node ./out/test/runTest.js"
   },
   "devDependencies": {
+    "@types/chai": "^4.3.6",
     "@types/glob": "^8.1.0",
     "@types/mocha": "^10.0.1",
     "@types/node": "16.x",
@@ -105,12 +107,14 @@
     "webpack-cli": "^5.0.1"
   },
   "dependencies": {
-    "@types/chai": "^4.3.6",
+    "ably": "^1.2.44",
+    "bufferutil": "^4.0.7",
     "node-fetch": "^3.3.2",
     "node-machine-id": "^1.1.12",
     "openai": "^4.6.0",
     "posthog-node": "^3.1.2",
-    "tailwindcss": "^3.3.3"
+    "tailwindcss": "^3.3.3",
+    "utf-8-validate": "^6.0.3"
   },
   "husky": {
     "hooks": {
