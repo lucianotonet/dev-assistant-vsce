@@ -14,21 +14,16 @@ export async function activateExtension(context: vscode.ExtensionContext) {
         handleSplashCommand(context);
     });
     extensionContext?.subscriptions.push(splashDisposable);
-}
 
-function registerLoginCommand(iconPath: any) {
+    // Register the login command
     let loginDisposable = vscode.commands.registerCommand('dev-assistant.login', () => {
         loginHandler.handleLoginCommand(context);
     });
     extensionContext?.subscriptions.push(loginDisposable);
-}
 
     // Register the chat command
     let chatDisposable = vscode.commands.registerCommand('dev-assistant.chat', () => {
         handleChatCommand(context);
     });
-
-    context.subscriptions.push(splashDisposable);
-    context.subscriptions.push(loginDisposable);
-    context.subscriptions.push(chatDisposable);
+    extensionContext?.subscriptions.push(chatDisposable);
 }
