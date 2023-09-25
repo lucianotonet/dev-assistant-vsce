@@ -17,8 +17,8 @@ describe('Chat View Tests', () => {
 
     it('should display chat interface', async () => {
         const panel = handleChatCommand(context);
-        assert.strictEqual(panel.title, 'Dev Assistant Chat');
-        assert.strictEqual(panel.viewType, 'dev-assistant.chatView');
-        assert.strictEqual(panel.visible, true);
+        assert.strictEqual(panel?.title, 'Dev Assistant Chat');
+        assert.strictEqual(panel?.viewType, 'dev-assistant.chatView');
+        assert.strictEqual(panel?.visible, true);
     });
 });

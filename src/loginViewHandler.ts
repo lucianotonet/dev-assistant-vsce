@@ -9,10 +9,6 @@ export class LoginViewHandler {
     private ablyRealtime: any;
     private ablyChannel: any;
 
-    private constructor() {
-        this.initAbly();
-    }
-
     public static getInstance(): LoginViewHandler {
         if (!LoginViewHandler.instance) {
             LoginViewHandler.instance = new LoginViewHandler();
@@ -29,7 +25,7 @@ export class LoginViewHandler {
             }
             const response = await axios.post(`${API_URL}/ably-auth`, {}, {
                 headers: {
-                    'Authorization': `Bearer ${token}`
+                    'authorization': `Bearer ${token}`
                 }
             });
             return response.data;
@@ -58,8 +54,6 @@ export class LoginViewHandler {
     }
 
     public handleLoginCommand(context: vscode.ExtensionContext) {
-        // Implement authentication logic here
-        // After successful authentication, initialize Ably connection
         this.initAbly();
     }
 }

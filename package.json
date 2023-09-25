@@ -3,7 +3,7 @@
   "displayName": "Dev Assistant AI",
   "description": "Let ChatGPT streamline your programming tasks!",
   "version": "0.0.4",
-  "icon": "resources/icon_nobg.png",
+  "icon": "assets/img/icon_nobg.png",
   "publisher": "lucianotonet",
   "license": "MIT",
   "engines": {
@@ -58,7 +58,7 @@
         {
           "id": "devAssistantViewContainer",
           "title": "Dev Assistant AI",
-          "icon": "resources/dark-icon.png"
+          "icon": "assets/img/dark-icon.png"
         }
       ]
     },
