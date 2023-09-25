@@ -1,54 +1,20 @@
 # Dev Assistant VSCode Extension
 
-O Dev Assistant agora está disponível como uma extensão para o Visual Studio Code! 
-Esta extensão permite que você interaja com o Dev Assistant sem sair do VSCode.
+Dev Assistant is now available as a Visual Studio Code extension!
+This extension let ChatGPT to interact with your VSCode editor.
 
-## 🌟 Funcionalidades
+## 🌱 Current Project Stage
 
-- **Interação via chat**: Permite que você interaja com o Dev Assistant diretamente no VSCode. #TODO: Adicionar interface após login
-- **Gerenciamento de Arquivos**: Permite a criação, renomeação, exclusão e movimentação de arquivos e pastas ao Dev Assistant.
-- **Controle de Versão Git**: Permite o Dev Assistant realizar os comandos básicos do Git.
-- **Execução de Comandos**: Permite que o Dev Assistant execute comandos no terminal do VSCode.
+This project is in its early stages and is still shaping its identity. While we have a clear vision of some features and goals, there is still much to be explored and decided. We invite the community to join us on this journey to shape the future of Dev Assistant. However, it is important to mention that while we seek to engage the community, we also have plans to monetize certain aspects of the project to ensure its long-term sustainability.
 
-## 🚀 Como Começar
+## 🙏 Acknowledgments
 
-1. Instale a extensão Dev Assistant do VSCode Marketplace.
-2. Depois de instalado, você verá um ícone do Dev Assistant na barra lateral. Clique nele para iniciar.
-3. Conecte-se ao Dev Assistant usando suas credenciais. #TODO: Adicionar funcionalidade de login.
-4. Instale o Dev Assistant Python Client no seu computador.
-5. Inicie o Dev Assistant Python Client e conecte-se ao Dev Assistant.
-6. Agora você pode interagir com o Dev Assistant diretamente no VSCode!
+A special thanks to:
 
-## 📜 Requisitos
+- Luciano T. for the initiative and development of the project.
+- ChatGPT for providing an amazing platform for interaction.
+- GitHub Copilot for assisting in development and coding.
 
-- Visual Studio Code
-- [Dev Assistant Client](https://github.com/lucianotonet/dev-assistant-client) instalado e configurado.
-- Assinatura ChatGPT Plus.
+## 💬 Discord Channel
 
-## 🌱 Estágio Atual do Projeto
-
-Este projeto está em seus estágios iniciais e ainda está moldando sua identidade. Embora tenhamos uma visão clara de algumas funcionalidades e objetivos, ainda há muito a ser explorado e decidido. Convidamos a comunidade a se juntar a nós nesta jornada para moldar o futuro do Dev Assistant. No entanto, é importante mencionar que, enquanto buscamos envolver a comunidade, também temos planos de monetizar certos aspectos do projeto para garantir sua sustentabilidade a longo prazo.
-
-## 🤝 Contribuindo
-
-Contribuições são muito bem-vindas! Se você tem uma ideia para uma melhoria ou encontrou um bug, por favor, abra uma issue. Sinta-se à vontade para fazer fork do repositório e enviar um pull request se quiser contribuir com código. Junte-se ao nosso [Discord](https://discord.gg/vvcSby8f5) para discutir ideias, dar feedback e colaborar com outros membros da comunidade.
-
-## 📄 Licença
-
-O Dev Assistant VSCode Extension é um software de código aberto, licenciado sob a licença MIT.
-
-## 📞 Suporte
-
-Se você encontrar algum problema ou tiver alguma dúvida, não hesite em abrir uma issue no GitHub ou nos contatar através do [Discord](https://discord.gg/vvcSby8f5). Estamos aqui para ajudar!
-
-## 🙏 Agradecimentos
-
-Um agradecimento especial a:
-
-- Luciano T. pela iniciativa e desenvolvimento do projeto.
-- ChatGPT por fornecer uma plataforma incrível para interação.
-- GitHub Copilot por auxiliar no desenvolvimento e codificação.
-
-## 🤖 Discord Bot
-
-Temos um bot no Discord que pode ser encontrado [aqui](https://github.com/lucianotonet/dev-assistant-discord-bot). Estamos explorando maneiras de integrar e utilizar este bot para melhorar a experiência da comunidade. Se você tem ideias ou sugestões, adoraríamos ouvir!
+Join our [Discord](https://discord.gg/XqmMey66q) to discuss ideas, give feedback, and collaborate with other community members.
