@@ -1,5 +1,6 @@
 import * as vscode from "vscode";
-import { showSplashWebview, showLoginWebview, showChatWebview } from './webviews';
+import { showSplashWebview, showChatWebview } from './webviews';
+import { AuthHandler } from './authHandler';
 
 export function registerCommands(context: vscode.ExtensionContext, iconPath: any) {
     // Register the splash command
@@ -7,16 +8,17 @@ export function registerCommands(context: vscode.ExtensionContext, iconPath: any
         showSplashWebview(iconPath);
     });
 
-    // Register the login command
-    let loginDisposable = vscode.commands.registerCommand('dev-assistant.login', () => {
-        showLoginWebview(iconPath);
-    });
-
     // Register the chat command
     let chatDisposable = vscode.commands.registerCommand('dev-assistant.chat', () => {
         showChatWebview(iconPath);
     });
 
+    // Register the login command
+    let loginDisposable = vscode.commands.registerCommand('dev-assistant.login', () => {
+        AuthHandler.getInstance().handleLoginCommand(context);
+    });
+
     // Add to context subscriptions
-    context.subscriptions.push(splashDisposable, loginDisposable, chatDisposable);
+    context.subscriptions.push(splashDisposable, chatDisposable, loginDisposable);
 }
+

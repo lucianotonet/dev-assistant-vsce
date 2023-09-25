@@ -1,10 +1,10 @@
 import * as vscode from "vscode";
 import { handleSplashCommand } from "./splashViewHandler";
-import { LoginViewHandler } from "./loginViewHandler";
+import { AuthHandler } from "./authHandler";
 import { handleChatCommand } from "./chatViewHandler";
 
 export let extensionContext: vscode.ExtensionContext | undefined = undefined;
-let loginHandler = LoginViewHandler.getInstance();
+let loginHandler = AuthHandler.getInstance();
 
 export async function activateExtension(context: vscode.ExtensionContext) {
     extensionContext = context;

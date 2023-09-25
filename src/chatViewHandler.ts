@@ -1,13 +1,13 @@
 import * as vscode from "vscode";
 import { getChatWebviewContent } from "./webviews/chatView";
-import { LoginViewHandler } from './loginViewHandler';
+import { AuthHandler } from './authHandler';
 
 export function handleChatCommand(context: vscode.ExtensionContext) {
     const token = vscode.workspace.getConfiguration('devAssistant').get('token');
     if (!token) {
         vscode.window.showErrorMessage('Please login to DevAssistant.', 'Login').then(selection => {
             if (selection === 'Login') {
-                LoginViewHandler.getInstance().handleLoginCommand(context);
+                AuthHandler.getInstance().handleLoginCommand(context);
             }
         });
         return;
