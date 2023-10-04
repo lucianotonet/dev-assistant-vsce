@@ -3,9 +3,9 @@ import { getChatWebviewContent } from "./webviews/chatView";
 import { AuthHandler } from './authHandler';
 
 export function handleChatCommand(context: vscode.ExtensionContext) {
-    const token = vscode.workspace.getConfiguration('devAssistant').get('token');
+    const token = context.globalState.get('devAssistant.authToken');
     if (!token) {
-        AuthHandler.getInstance().handleLoginCommand(context);
+        AuthHandler.getInstance().handleAuthCommand(context);
         return;
     }
 
@@ -14,7 +14,7 @@ export function handleChatCommand(context: vscode.ExtensionContext) {
         dark: vscode.Uri.file(context.asAbsolutePath('assets/img/dark-icon.png'))
     };
 
-    const panel = vscode.window.createWebviewPanel('dev-assistant.chatView', 'Dev Assistant Chat',
+    const panel = vscode.window.createWebviewPanel('devAssistant.chatView', 'Dev Assistant Chat',
         vscode.ViewColumn.Beside, { enableScripts: true }
     );
 

@@ -4,3 +4,4 @@ node_modules
 *-error.log
 .vscode-test/
 *.vsix
+.env

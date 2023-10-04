@@ -1,5 +1,7 @@
 import * as vscode from 'vscode';
 import { APP_URL, API_URL } from '../utils';
+const EDITOR = vscode.env.appName.toLowerCase();
+
 export class SplashView {
 
     public static getWebviewContent(panel: vscode.WebviewPanel): string {
@@ -16,12 +18,12 @@ export class SplashView {
                         flex-direction: column;
                         align-items: center;
                         height: 100vh;
-                        font-family: ui-monospace, "Menlo", "Monaco", "Consolas", "Liberation Mono", "Courier New", monospace;
+                        font-family: "Consolas", "Liberation Mono", "Courier New", monospace;
                         gap: 20px;
                     }   
                     #logo {
                         display: flex;
-                        font-family: ui-monospace, "Menlo", "Monaco", "Consolas", "Liberation Mono", "Courier New", monospace;
+                        font-family: "Consolas", "Liberation Mono", "Courier New", monospace;
                         justify-content: center;
                         align-items: center;                        
                     }  
@@ -51,8 +53,9 @@ export class SplashView {
                     <!-- Conditional links for login or greeting if already logged in -->
                     <script>
                         const token = localStorage.getItem('token');
-                        if (!token) {
-                            document.write('<a href="${APP_URL}/login">Login</a>');
+                        if (!token) {                            
+                            document.write('<a href="${APP_URL}/login?redirect_to=${EDITOR}">Login</a> &nbsp;');
+                            document.write('<a href="${APP_URL}/github/login?redirect_to=${EDITOR}">Login with GitHub</a>');
                         } else {
                             fetch('${API_URL}/user', {
                                 headers: {

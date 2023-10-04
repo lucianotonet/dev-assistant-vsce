@@ -14,11 +14,16 @@ export function registerCommands(context: vscode.ExtensionContext, iconPath: any
     });
 
     // Register the login command
-    let loginDisposable = vscode.commands.registerCommand('dev-assistant.login', () => {
-        AuthHandler.getInstance().handleLoginCommand(context);
+    let authDisposable = vscode.commands.registerCommand('dev-assistant.auth', () => {
+        AuthHandler.getInstance().handleAuthCommand(context);
+    });
+
+    // Register the logout command
+    let deauthDisposable = vscode.commands.registerCommand('dev-assistant.deauth', () => {
+        AuthHandler.getInstance().handleAuthCommand(context);
     });
 
     // Add to context subscriptions
-    context.subscriptions.push(splashDisposable, chatDisposable, loginDisposable);
+    context.subscriptions.push(splashDisposable, chatDisposable, authDisposable, deauthDisposable);
 }
 
