@@ -54,6 +54,21 @@
         "title": "Disconnect VSCE from Dev Assistant AI"
       },
       {
+        "command": "dev-assistant.welcome",
+        "category": "Dev Assistant AI",
+        "title": "Welcome to Dev Assistant AI"
+      },
+      {
+        "command": "dev-assistant.goodbye",
+        "category": "Dev Assistant AI",
+        "title": "Goodbye from Dev Assistant AI"
+      },
+      {
+        "command": "dev-assistant.showTimeline",
+        "category": "Dev Assistant AI",
+        "title": "Show Timeline"
+      },
+      {
         "command": "dev-assistant.quickFix",
         "category": "Dev Assistant AI",
         "title": "Quick Fix with Dev Assistant AI"
