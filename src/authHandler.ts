@@ -14,11 +14,11 @@ export class AuthHandler {
     }
 
     public handleAuthCommand(context: vscode.ExtensionContext, loginMessage: string = 'We need an API KEY to connect VSCode to Dev Assistant.') {
-        vscode.window.showInformationMessage(loginMessage, 'Generate API KEY').then((selection) => {
+        vscode.window.showInformationMessage(loginMessage, 'Generate an API KEY').then((selection) => {
             if (selection) {
                 this.redirectedFromLogin = true;
                 const editor = vscode.env.appName.toLowerCase();
-                const url = `${APP_URL}/auth/${CLIENT_ID}?client_type=${editor}`;
+                const url = `${APP_URL}/auth/clients/${CLIENT_ID}?client_type=${editor}`;
                 
                 const uri = vscode.Uri.parse(url);
                 vscode.env.openExternal(uri);
@@ -33,19 +33,7 @@ export class AuthHandler {
     }
 
     public handleDeauthCommand(context: vscode.ExtensionContext) {
-        const token = context.globalState.get('devAssistant.authToken');
-        if (token) {
-            axios.post(`${APP_URL}/auth/deauthenticate`, {}, { headers: { 'Authorization': `Bearer ${token}` } })
-                .then(() => {
-                    context.globalState.update('devAssistant.authToken', null);
-                    vscode.window.showInformationMessage('Extension is now deauthenticated!');
-                })
-                .catch((error) => {
-                    vscode.window.showErrorMessage(`Error on authenticate extension: ${error}`);
-                });
-        } else {
-            vscode.window.showInformationMessage('Extension is not authenticated!');
-        }
+        
     }
 
     private static async askForAuthToken(context: vscode.ExtensionContext) {
@@ -57,7 +45,7 @@ export class AuthHandler {
         if (token) {
             await context.globalState.update('devAssistant.authToken', token);
             vscode.window.showInformationMessage('Token salvo com sucesso!');
-            this.handleAuthCallback(vscode.Uri.parse(`${API_URL}/auth/success?${token}`), context);
+            this.handleAuthCallback(vscode.Uri.parse(`${API_URL}/auth/clients/success?accessToken=${token}`), context);
         }
     }
 

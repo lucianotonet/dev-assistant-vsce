@@ -25,8 +25,7 @@ export async function activate(context: vscode.ExtensionContext) {
         console.log("Error activating extension: ", e);
         // Show error message and provide options to view logs or retry
         vscode.window
-            .showInformationMessage(
-                "Error activating Dev Assistant AI extension.",
+            .showInformationMessage("Error activating Dev Assistant AI extension.",
                 "View Logs",
                 "Retry"
             )

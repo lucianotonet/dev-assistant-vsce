@@ -14,7 +14,7 @@ export function getUniqueId() {
 let APP_URL: string;
 
 // Check the environment and set the APP_URL accordingly
-APP_URL = process.env.NODE_ENV === 'production' ? 'https://devassistant.tonet.dev' : (process.env.APP_URL ?? 'https://dev-assistant-server.test');
+APP_URL = process.env.APP_URL ?? 'https://devassistant.tonet.dev';
 
 export { APP_URL };
 export const API_URL = `${APP_URL}/api`;
