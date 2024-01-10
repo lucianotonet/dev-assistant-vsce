@@ -6,6 +6,8 @@ import axios from 'axios';
 import { CLIENT_ID, APP_URL, API_URL } from './utils';
 import fetch from 'node-fetch';
 import { AuthHandler } from './authHandler';
+import { IOHandler } from './IOHandler';
+
 
 interface TokenResponse {
     tokenRequest: string;
@@ -82,20 +84,19 @@ export class AblyHandler {
 
     private handleAblyMessage(message: any): void {
         vscode.window.showWarningMessage('Dev Assistant message: \n' + message.data);
-        
-        // Example: Insert text into the open file
-        const editor = vscode.window.activeTextEditor;
-        if (editor) {
-            const position = editor.selection.active; // Get the cursor position
-            editor.edit(editBuilder => {
-                editBuilder.insert(position, message.data); // Insert the message text at the cursor position
-            });
-        } else {
-            // Example: Display notification
-            vscode.window.showInformationMessage('Received Ably message: \n' + message.data);
-        }
+
+        const commandOrchestrator = IOHandler.getInstance();
+        const { operation, args } = JSON.parse(message.data);
+        commandOrchestrator.executeCommand(operation, args);
     }
 
+    public async sendInstruction(instruction: string): Promise<void> {
+        if (this.ablyChannel) {
+            this.ablyChannel.publish({ data: instruction });
+        } else {
+            vscode.window.showErrorMessage('Ably channel is not initialized.');
+        }
+    }
    
     // 1. Get the TOKEN REQUEST
     private async getAblyTokenRequest(): Promise<string> {
