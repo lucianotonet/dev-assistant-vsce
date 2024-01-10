@@ -1,6 +1,5 @@
 import * as vscode from 'vscode';
 import { capture } from './analytics';
-import { getUniqueId } from './utils';
 import { AuthHandler } from "./authHandler";
 import { AblyHandler } from "./ablyHandler";
 import { ApiHandler } from './apiHandler';
@@ -99,7 +98,7 @@ export async function activate(context: vscode.ExtensionContext) {
         context.globalState.update("hasBeenInstalled", true);
         // Capture install event
         capture({
-            distinctId: getUniqueId(),
+            distinctId: AuthHandler.getInstance().getClientId(),
             event: "install",
             properties: {
                 platform: process.platform,
@@ -111,7 +110,13 @@ export async function activate(context: vscode.ExtensionContext) {
     }    
 
     let authDisposable = vscode.commands.registerCommand('dev-assistant-ai.auth', async () => {
-        await AuthHandler.getInstance().handleAuthCommand(context);        
+        try {
+            await AuthHandler.getInstance().handleAuthCommand(context);
+        } catch (error) {
+            console.error("Failed to handle auth command", error);
+            vscode.window.showErrorMessage("Failed to handle auth command");
+            return;
+        }
         await AblyHandler.getInstance().init(context);
     });
 

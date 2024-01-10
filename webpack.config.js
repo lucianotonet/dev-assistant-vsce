@@ -3,6 +3,7 @@
 'use strict';
 
 const path = require('path');
+const Dotenv = require('dotenv-webpack');
 
 //@ts-check
 /** @typedef {import('webpack').Configuration} WebpackConfig **/
@@ -40,6 +41,12 @@ const extensionConfig = {
       }
     ]
   },
+  plugins: [
+    new Dotenv({
+      path: './.env', // Caminho para o seu arquivo .env
+    }),
+    // ... (outros plugins)
+  ],
   devtool: 'nosources-source-map',
   infrastructureLogging: {
     level: "log", // enables logging required for problem matchers

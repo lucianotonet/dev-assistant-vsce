@@ -1,15 +1,59 @@
 import * as vscode from 'vscode';
 import { API_URL } from './utils';
 import axios from 'axios';
+import { AuthHandler } from './authHandler';
 
 export class ApiHandler {
     private static instance: ApiHandler;
-    
+
     public static getInstance(): ApiHandler {
         if (!ApiHandler.instance) {
             ApiHandler.instance = new ApiHandler();
         }
         return ApiHandler.instance;
+    }
+
+    public async post(context: vscode.ExtensionContext, url: string, data: any) {
+        const token = await AuthHandler.getInstance().retrieveToken(context, 'devAssistant.client.accessToken');
+        if (!token) {
+            throw new Error('Token not found');
+        }
+        url = this.constructUrl(url);
+        return axios.post(url, data, {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            }
+        });
+    }
+
+    public async get(context: vscode.ExtensionContext, url: string) {
+        const token = await AuthHandler.getInstance().retrieveToken(context, 'devAssistant.client.accessToken');
+        url = this.constructUrl(url);
+        return axios.get(url, {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            }
+        });
+    }
+
+    public async put(context: vscode.ExtensionContext, url: string, data: any) {
+        const token = await AuthHandler.getInstance().retrieveToken(context, 'devAssistant.client.accessToken');
+        url = this.constructUrl(url);
+        return axios.put(url, data, {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            }
+        });
+    }
+
+    private constructUrl(url: string): string {
+        return url.startsWith('http') ? url : `${API_URL}${url}`; // If url doesn't start with http or https, concatenate with API_URL
     }
 
     public async postWithToken(url: string, token: string) {

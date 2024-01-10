@@ -30,15 +30,32 @@
       },
       "resource": {
         "tailwindCSS.experimental.configFile": "./tailwind.config.js",
-        "tailwindCSS.files.exclude": ["**/node_modules/**"]
+        "tailwindCSS.files.exclude": [
+          "**/node_modules/**"
+        ]
       }
     },
     "commands": [
-      { "command": "dev-assistant-ai.welcome", "title": "Welcome" },
-      { "command": "dev-assistant-ai.auth", "title": "Auth" },
-      { "command": "dev-assistant-ai.callback", "title": "Callback" },
-      { "command": "dev-assistant-ai.deauth", "title": "Deauth" },
-      { "command": "dev-assistant-ai.openConversation", "title": "Open Conversation" }
+      {
+        "command": "dev-assistant-ai.welcome",
+        "title": "Welcome"
+      },
+      {
+        "command": "dev-assistant-ai.auth",
+        "title": "Auth"
+      },
+      {
+        "command": "dev-assistant-ai.callback",
+        "title": "Callback"
+      },
+      {
+        "command": "dev-assistant-ai.deauth",
+        "title": "Deauth"
+      },
+      {
+        "command": "dev-assistant-ai.openConversation",
+        "title": "Open Conversation"
+      }
     ],
     "keybindings": [],
     "menus": {
@@ -53,7 +70,7 @@
         }
       ]
     },
-    "views": {      
+    "views": {
       "devAssistantViewContainer": [
         {
           "id": "dev-assistant-ai.chatView",
@@ -92,6 +109,7 @@
     "@typescript-eslint/eslint-plugin": "^5.56.0",
     "@typescript-eslint/parser": "^5.56.0",
     "@vscode/test-electron": "^2.3.0",
+    "dotenv-webpack": "^8.0.1",
     "eslint": "^8.36.0",
     "glob": "^8.1.0",
     "husky": "^8.0.3",

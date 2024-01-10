@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { APP_URL, CLIENT_ID } from './utils';
+import { DEV_ASSISTANT_SERVER } from './utils';
 import { ApiHandler } from './apiHandler';
 
 const USER_NAME_KEY = 'devAssistant.user.name';
@@ -8,6 +8,7 @@ const USER_ID_KEY = 'devAssistant.user.id';
 export class AuthHandler {
     private static instance: AuthHandler = new AuthHandler();
     private apiHandler: ApiHandler;
+    private clientId: string | undefined; // Adicionado para armazenar o clientId
 
     private constructor() {
         this.apiHandler = ApiHandler.getInstance();
@@ -17,10 +18,14 @@ export class AuthHandler {
         return AuthHandler.instance;
     }
 
+    public getClientId(): string | undefined {
+        return this.clientId;
+    }
+
     public async handleAuthCommand(context: vscode.ExtensionContext): Promise<void> {
         const userToken = await this.retrieveToken(context, 'devAssistant.user.accessToken');
-        const clientToken = await this.retrieveToken(context, 'devAssistant.user.clientToken');
-        if (clientToken) {
+        const clientToken = await this.retrieveToken(context, 'devAssistant.client.accessToken');
+        if (userToken && clientToken) {
             await this.fetchAndStoreUserDetails(context);
         } else {
             await this.authenticateUser(context);
@@ -31,15 +36,15 @@ export class AuthHandler {
         await this.deleteToken(context, 'devAssistant.user.accessToken');
         await this.deleteToken(context, 'devAssistant.user.refreshToken');
         await this.deleteToken(context, 'devAssistant.client.accessToken');
-        
+
         await context.secrets.delete('devAssistant');
 
-        vscode.window.showInformationMessage('Extensão desconectada com sucesso!');
+        vscode.window.showInformationMessage('A extensão foi desconectada do servidor!');
     }
 
     private async validateToken(context: vscode.ExtensionContext, token: string): Promise<boolean> {
         try {
-            const response = await this.apiHandler.getWithToken(`${APP_URL}/api/user`, token);
+            const response = await this.apiHandler.getWithToken(`${DEV_ASSISTANT_SERVER}/api/user`, token);
             return response.status === 200;
         } catch (error: any) {
             if (error.response?.status === 401) {
@@ -53,7 +58,15 @@ export class AuthHandler {
     }
 
     private async authenticateUser(context: vscode.ExtensionContext): Promise<void> {
-        const url = this.getAuthUrl();
+        const appName = vscode.env.appName;
+        const appType = 'vsce';
+        let url = `${DEV_ASSISTANT_SERVER}/auth/vsce?app_type=${appType}&app_name=${appName}`;
+
+        this.clientId = await this.retrieveToken(context, 'devAssistant.client.id');
+        if (this.clientId) {
+            url += `&client_id=${this.clientId}`;
+        }
+
         vscode.env.openExternal(vscode.Uri.parse(url));
         await this.delay(2000);
 
@@ -64,30 +77,27 @@ export class AuthHandler {
         });
         if (inputToken) {
             await this.storeToken(context, 'devAssistant.client.accessToken', inputToken);
+            vscode.workspace.getConfiguration('devAssistant').update('client.accessToken', inputToken, vscode.ConfigurationTarget.Global);
             await this.fetchAndStoreUserDetails(context);
         }
-    }
-
-    private getAuthUrl(): string {
-        const appName = vscode.env.appName;
-        const appType = 'vsce';
-        return `${APP_URL}/auth/vsce?client_id=${CLIENT_ID}&app_type=${appType}&app_name=${appName}`;
     }
 
     private async fetchAndStoreUserDetails(context: vscode.ExtensionContext): Promise<void> {
         const clientToken = await this.retrieveToken(context, 'devAssistant.client.accessToken');
         if (!clientToken) {
-            throw new Error('Token is undefined');
+            await this.authenticateUser(context);
         }
 
         try {
-            const response = await this.apiHandler.postWithToken(`${APP_URL}/api/auth/vsce`, clientToken);
-            const { access_token, refresh_token } = response.data;
+            const response = await this.apiHandler.postWithToken(`${DEV_ASSISTANT_SERVER}/api/auth/vsce`, clientToken!);
+            const { access_token, refresh_token, client_id } = response.data;
 
+            this.clientId = client_id; // Armazena o clientId retornado pela API
+            await this.storeToken(context, 'devAssistant.client.id', client_id);
             await this.storeToken(context, 'devAssistant.user.accessToken', access_token);
             await this.storeToken(context, 'devAssistant.user.refreshToken', refresh_token);
 
-            const userDataResponse = await this.apiHandler.getWithToken(`${APP_URL}/api/user`, access_token);
+            const userDataResponse = await this.apiHandler.getWithToken(`${DEV_ASSISTANT_SERVER}/api/user`, access_token);
             const userName = userDataResponse.data.name;
             const userEmail = userDataResponse.data.email;
             const userId = userDataResponse.data.id;
