@@ -5,6 +5,7 @@ import { ApiHandler } from './apiHandler';
 import axios from 'axios';
 import { CLIENT_ID, APP_URL, API_URL } from './utils';
 import fetch from 'node-fetch';
+import { AuthHandler } from './authHandler';
 
 interface TokenResponse {
     tokenRequest: string;
@@ -23,31 +24,65 @@ export class AblyHandler {
         return AblyHandler.instance;
     }
 
-    public async getTokenRequest(deviceId: string): Promise<any> {
-        const response = await axios.get(`${API_URL}/auth/${deviceId}/ably`);
-        return response.data;
+    public async getTokenRequest(context: vscode.ExtensionContext): Promise<any> {
+        const apiHandler = ApiHandler.getInstance();
+        const authHandler = AuthHandler.getInstance();
+        
+        const token = await authHandler.retrieveToken(context, 'devAssistant.client.accessToken');
+
+        if (token) {
+            const response = await apiHandler.getWithToken(`${APP_URL}/auth/clients/${CLIENT_ID}/ably`, token);
+            return response.data;
+        } else {
+            throw new Error('Token is undefined');
+        }
     }
 
-    public async initAbly(): Promise<void> {
-        const deviceId = machineIdSync();
-        const tokenRequest = await this.getTokenRequest(deviceId);
-        this.ablyRealtime = new Ably.Realtime({ token: tokenRequest.token });
-        if (!this.ablyRealtime) {
-            vscode.window.showErrorMessage('Failed to initialize Ably.');
-            return;
+    public async init(context: vscode.ExtensionContext): Promise<void> {
+        vscode.window.showInformationMessage('Iniciando Ably...');
+
+        const tokenRequest = await this.getTokenRequest(context);
+        if (tokenRequest) {
+            // Check if keyName is in token_request
+            if (!tokenRequest.keyName) {
+                vscode.window.showErrorMessage("An error occurred while initializing Ably: 'keyName' not found in token_request");
+                return;
+            }
+
+            // Request token from Ably
+            const tokenUrl = `https://rest.ably.io/keys/${tokenRequest.keyName}/requestToken`;
+            const tokenResponse = await axios.post(tokenUrl, tokenRequest);
+
+            // Check if response is not None
+            let token;
+            if (tokenResponse && tokenResponse.data) {
+                token = tokenResponse.data.token;
+            }
+
+            // Initialize Ably with the received token
+            try {
+                if (token) {
+                    this.ablyRealtime = new Ably.Realtime({ token });
+                } else {
+                    this.ablyRealtime = null;
+                }
+            } catch (error) {
+                vscode.window.showErrorMessage(`An error occurred while initializing Ably: ${error}`);
+                return;
+            }
         }
-        this.ablyChannel = this.ablyRealtime.channels.get(`private:dev-assistant-${deviceId}`);
+        this.ablyChannel = this.ablyRealtime.channels.get(`private:dev-assistant-${CLIENT_ID}`);
         if (!this.ablyChannel) {
             vscode.window.showErrorMessage('Failed to initialize private channel.');
             return;
         }
         this.ablyChannel.subscribe(this.handleAblyMessage);
+        vscode.window.showInformationMessage('Dev Assistant is ready and listening for new instructions...');
     }
 
     private handleAblyMessage(message: any): void {
-        // Logging the received message (keep this for debugging)
-        console.log('Received Ably message:', message.data);
-
+        vscode.window.showWarningMessage('Dev Assistant message: \n' + message.data);
+        
         // Example: Insert text into the open file
         const editor = vscode.window.activeTextEditor;
         if (editor) {
@@ -64,7 +99,7 @@ export class AblyHandler {
    
     // 1. Get the TOKEN REQUEST
     private async getAblyTokenRequest(): Promise<string> {
-        const url = `${API_URL}/auth/${CLIENT_ID}/ably`;
+        const url = `${API_URL}/auth/clients/${CLIENT_ID}/ably`;
         try {
             const response = await fetch(url);
             const data = await (response.json() as Promise<TokenResponse>);

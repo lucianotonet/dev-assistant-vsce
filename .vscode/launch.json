@@ -15,6 +15,7 @@
             "env": {
                 "NODE_ENV": "development",
                 "VSCODE_DEBUG_MODE": "true",
+                "APP_URL": "https://dev-assistant-server.local"
             }
         }
     ]

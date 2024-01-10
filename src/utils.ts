@@ -10,13 +10,8 @@ export function getUniqueId() {
     return id;
 }
 
-// Export the URL of the API
-let APP_URL: string;
-
 // Check the environment and set the APP_URL accordingly
-APP_URL = process.env.APP_URL ?? 'https://devassistant.tonet.dev';
-
-export { APP_URL };
+export const APP_URL = process.env.APP_URL ?? 'https://devassistant.tonet.dev';
 export const API_URL = `${APP_URL}/api`;
-
 export const CLIENT_ID = getUniqueId();
+

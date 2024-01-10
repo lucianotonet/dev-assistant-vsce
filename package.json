@@ -18,9 +18,6 @@
     "Other"
   ],
   "main": "./dist/extension.js",
-  "activationEvents": [
-    "onStartupFinished"
-  ],
   "contributes": {
     "configuration": {
       "title": "Dev Assistant AI",
@@ -30,49 +27,18 @@
           "default": "https://devassistant.tonet.dev",
           "description": "The URL of the Dev Assistant AI server. If you want to use an LLM hosted at a custom URL, please see https://devassistant.tonet.dev/docs/customization#change-the-default-llm. All other configuration can be done by using the '/config' slash command."
         }
+      },
+      "resource": {
+        "tailwindCSS.experimental.configFile": "./tailwind.config.js",
+        "tailwindCSS.files.exclude": ["**/node_modules/**"]
       }
     },
     "commands": [
-      {
-        "command": "dev-assistant.splash",
-        "category": "Dev Assistant AI",
-        "title": "Open Splash"
-      },
-      {
-        "command": "dev-assistant.chat",
-        "category": "Dev Assistant AI",
-        "title": "Open Chat"
-      },
-      {
-        "command": "dev-assistant.auth",
-        "category": "Dev Assistant AI",
-        "title": "Connect VSCE to Dev Assistant AI"
-      },
-      {
-        "command": "dev-assistant.deauth",
-        "category": "Dev Assistant AI",
-        "title": "Disconnect VSCE from Dev Assistant AI"
-      },
-      {
-        "command": "dev-assistant.welcome",
-        "category": "Dev Assistant AI",
-        "title": "Welcome to Dev Assistant AI"
-      },
-      {
-        "command": "dev-assistant.goodbye",
-        "category": "Dev Assistant AI",
-        "title": "Goodbye from Dev Assistant AI"
-      },
-      {
-        "command": "dev-assistant.showTimeline",
-        "category": "Dev Assistant AI",
-        "title": "Show Timeline"
-      },
-      {
-        "command": "dev-assistant.quickFix",
-        "category": "Dev Assistant AI",
-        "title": "Quick Fix with Dev Assistant AI"
-      }
+      { "command": "dev-assistant-ai.welcome", "title": "Welcome" },
+      { "command": "dev-assistant-ai.auth", "title": "Auth" },
+      { "command": "dev-assistant-ai.callback", "title": "Callback" },
+      { "command": "dev-assistant-ai.deauth", "title": "Deauth" },
+      { "command": "dev-assistant-ai.openConversation", "title": "Open Conversation" }
     ],
     "keybindings": [],
     "menus": {
@@ -87,17 +53,17 @@
         }
       ]
     },
-    "views": {
+    "views": {      
       "devAssistantViewContainer": [
         {
-          "id": "dev-assistant.chatView",
+          "id": "dev-assistant-ai.chatView",
           "name": "Dev Assistant AI Chat",
           "visibility": "visible"
         },
         {
-          "id": "dev-assistant.settingsView",
+          "id": "dev-assistant-ai.settingsView",
           "name": "Settings",
-          "visibility": "collapsed"
+          "visibility": "visible"
         }
       ]
     }
@@ -138,6 +104,7 @@
   "dependencies": {
     "ably": "^1.2.44",
     "bufferutil": "^4.0.7",
+    "dotenv": "^16.3.1",
     "node-fetch": "^3.3.2",
     "node-machine-id": "^1.1.12",
     "openai": "^4.6.0",

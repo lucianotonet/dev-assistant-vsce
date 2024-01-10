@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 200 200">
+  <defs>
+    <style>
+      .cls-1 {
+        filter: url(#outer-glow-3);
+      }
+
+      .cls-2 {
+        stroke: #fff;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        stroke-width: .5px;
+      }
+
+      .cls-2, .cls-3 {
+        fill: #fff;
+      }
+
+      .cls-4 {
+        isolation: isolate;
+      }
+
+      .cls-5 {
+        fill: none;
+      }
+
+      .cls-5, .cls-3, .cls-6, .cls-7 {
+        stroke-width: 0px;
+      }
+
+      .cls-8 {
+        filter: url(#drop-shadow-1);
+      }
+
+      .cls-9 {
+        filter: url(#luminosity-invert);
+      }
+
+      .cls-10 {
+        mix-blend-mode: screen;
+        opacity: .25;
+      }
+
+      .cls-6 {
+        fill: url(#Gradiente_sem_nome_4);
+      }
+
+      .cls-11 {
+        mask: url(#mask);
+      }
+
+      .cls-7 {
+        fill: #1e1e1e;
+      }
+    </style>
+    <filter id="drop-shadow-1" filterUnits="userSpaceOnUse">
+      <feOffset dx="0" dy="6"/>
+      <feGaussianBlur result="blur" stdDeviation="3"/>
+      <feFlood flood-color="#000" flood-opacity=".9"/>
+      <feComposite in2="blur" operator="in"/>
+      <feComposite in="SourceGraphic"/>
+    </filter>
+    <linearGradient id="Gradiente_sem_nome_4" data-name="Gradiente sem nome 4" x1="57.54" y1="164.65" x2="137.13" y2="43.45" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="lime"/>
+      <stop offset=".9" stop-color="#00ffd9"/>
+    </linearGradient>
+    <filter id="luminosity-invert" x="36" y="36" width="128" height="128" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse">
+      <feColorMatrix result="cm" values="-1 0 0 0 1 0 -1 0 0 1 0 0 -1 0 1 0 0 0 1 0"/>
+    </filter>
+    <mask id="mask" x="36" y="36" width="128" height="128" maskUnits="userSpaceOnUse">
+      <g class="cls-9">
+        <image width="128" height="128" transform="translate(36 36)" xlink:href="data:image/png;base64,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"/>
+      </g>
+    </mask>
+    <filter id="outer-glow-3" filterUnits="userSpaceOnUse">
+      <feOffset dx="0" dy="0"/>
+      <feGaussianBlur result="blur-2" stdDeviation="5"/>
+      <feFlood flood-color="#fff" flood-opacity=".25"/>
+      <feComposite in2="blur-2" operator="in"/>
+      <feComposite in="SourceGraphic"/>
+    </filter>
+  </defs>
+  <g class="cls-4">
+    <g id="Camada_2" data-name="Camada 2">
+      <g id="Camada_1-2" data-name="Camada 1">
+        <g class="cls-8">
+          <rect class="cls-6" x="27.5" y="27.5" width="145" height="145" rx="23.51" ry="23.51"/>
+          <g>
+            <path class="cls-7" d="m146.76,38.28H53.24c-8.25,0-14.96,6.71-14.96,14.96v93.52c0,8.25,6.71,14.96,14.96,14.96h93.52c8.25,0,14.96-6.71,14.96-14.96V53.24c0-8.25-6.71-14.96-14.96-14.96Z"/>
+            <g class="cls-11">
+              <g class="cls-10">
+                <path class="cls-3" d="m146.76,38.28H53.24c-8.25,0-14.96,6.71-14.96,14.96v93.52c0,8.25,6.71,14.96,14.96,14.96h93.52c8.25,0,14.96-6.71,14.96-14.96V53.24c0-8.25-6.71-14.96-14.96-14.96Z"/>
+              </g>
+            </g>
+          </g>
+          <g class="cls-1">
+            <path class="cls-2" d="m63.23,109.33l13.83-8.34v-.22l-13.83-8.34v-8.45l21.51,13.72v6.36l-21.51,13.72v-8.45Z"/>
+            <path class="cls-2" d="m86.86,121.73h26.34v6.91h-26.34v-6.91Z"/>
+            <path class="cls-2" d="m115.26,104.06v-6.36l21.51-13.72v8.45l-13.83,8.34v.22l13.83,8.34v8.45l-21.51-13.72Z"/>
+          </g>
+        </g>
+        <circle class="cls-5" cx="100" cy="100" r="100"/>
+      </g>
+    </g>
+  </g>
+</svg>
