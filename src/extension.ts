@@ -1,13 +1,9 @@
 import * as vscode from 'vscode';
-import { capture } from './analytics';
-import { AuthHandler } from './AuthHandler';
-import { registerCommands } from './commands';
-import { ChatDataProvider } from './ChatDataProvider';
-import { ConversationsDataProvider } from './ConversationsDataProvider';
-import { SettingsDataProvider } from './SettingsDataProvider';
-import { ChatWebviewProvider } from './ChatWebViewProvider';
-import { ConversationsWebviewProvider } from './ConversationsWebviewProvider';
-import { SettingsWebviewViewProvider } from './SettingsWebviewViewProvider';
+import { capture } from './utils/Utilities';
+import { AuthHandler } from './auth/AuthHandler';
+import { CommandRegistrar } from './commands/CommandRegistrar';
+import { ConversationsDataProvider } from './chat/ConversationsDataProvider';
+
 
 export async function activate(context: vscode.ExtensionContext) {
 
@@ -24,30 +20,9 @@ export async function activate(context: vscode.ExtensionContext) {
         });
     }
 
-    registerCommands(context);
-
-    const chatDataProvider = new ChatDataProvider(context);
-    const chatWebviewProvider = new ChatWebviewProvider();    
-
-    const conversationsDataProvider = new ConversationsDataProvider(context);
-    const conversationsWebviewProvider = new ConversationsWebviewProvider();
-
-    const settingsDataProvider = new SettingsDataProvider(context);
-    const settingsWebviewProvider = new SettingsWebviewViewProvider();
-    
-    context.subscriptions.push(vscode.window.registerTreeDataProvider('dev-assistant-ai.chat', chatDataProvider));
-    context.subscriptions.push(vscode.window.registerWebviewViewProvider('dev-assistant-ai.chat', chatWebviewProvider));
-
-    context.subscriptions.push(vscode.window.registerTreeDataProvider('dev-assistant-ai.conversations', conversationsDataProvider));
-    context.subscriptions.push(vscode.window.registerWebviewViewProvider('dev-assistant-ai.conversations', settingsWebviewProvider));
+    CommandRegistrar.registerAllCommands(context);
         
-    context.subscriptions.push(vscode.window.registerTreeDataProvider('dev-assistant-ai.settings', settingsDataProvider));
-    context.subscriptions.push(vscode.window.registerWebviewViewProvider('dev-assistant-ai.settings', conversationsWebviewProvider));
-        
-    vscode.commands.executeCommand('dev-assistant-ai.auth').then(() => {
-        const authHandler = AuthHandler.getInstance(context);
-        if (authHandler.getClientId()) {
-            vscode.commands.executeCommand('dev-assistant-ai.openChat');
-        }
-    });
+    await vscode.commands.executeCommand('dev-assistant-ai.auth');
+    await vscode.commands.executeCommand('dev-assistant-ai.openChat');    
 }
+

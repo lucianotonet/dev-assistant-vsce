@@ -25,7 +25,7 @@
         "devAssistant.serverUrl": {
           "type": "string",
           "default": "https://devassistant.tonet.dev",
-          "description": "The URL of the Dev Assistant AI server. If you want to use an LLM hosted at a custom URL, please see https://devassistant.tonet.dev/docs/customization#change-the-default-llm. All other configuration can be done by using the '/config' slash command."
+          "description": "The URL of the Dev Assistant AI server. If you want to use an LLM hosted in your custom URL."
         }
       },
       "resource": {
@@ -38,36 +38,54 @@
     "commands": [
       {
         "command": "dev-assistant-ai.welcome",
-        "title": "Welcome"
+        "title": "Welcome",
+        "category": "Dev Assistant AI"
       },
       {
         "command": "dev-assistant-ai.auth",
-        "title": "Auth"
+        "title": "Auth",
+        "category": "Dev Assistant AI"
       },
       {
         "command": "dev-assistant-ai.callback",
-        "title": "Callback"
+        "title": "Callback",
+        "category": "Dev Assistant AI"
       },
       {
         "command": "dev-assistant-ai.deauth",
-        "title": "Deauth"
+        "title": "Deauth",
+        "category": "Dev Assistant AI"
       },
       {
         "command": "dev-assistant-ai.openConversation",
-        "title": "Open Conversation"
+        "title": "Open Conversation",
+        "category": "Dev Assistant AI"
       },
       {
         "command": "dev-assistant-ai.triggerInlineCompletion",
-        "title": "Trigger Inline Completion"
+        "title": "Trigger Inline Completion",
+        "category": "Dev Assistant AI"
       },
       {
         "command": "dev-assistant-ai.showMagicInput",
-        "title": "Show Magic Input"
+        "title": "Show Magic Input",
+        "category": "Dev Assistant AI"
       },
       {
         "command": "dev-assistant-ai.openChat",
-        "title": "Open Chat"
-      }
+        "title": "Open Chat",
+        "category": "Dev Assistant AI"
+      },
+      {
+				"command": "dev-assistant-ai.start",
+				"title": "Start chat session",
+				"category": "Dev Assistant AI"
+			},
+			{
+				"command": "dev-assistant-ai.doAction",
+				"title": "Excute an action",
+				"category": "Dev Assistant AI"
+			}
     ],
     "keybindings": [
       {
@@ -85,7 +103,7 @@
         {
           "id": "devAssistantViewContainer",
           "title": "Dev Assistant AI",
-          "icon": "assets/img/dark-icon.png"
+          "icon": "assets/img/dark-icon.png"    
         }
       ],
       "panel": [
@@ -100,19 +118,21 @@
         }
       ]
     },
-    "views": {   
-      "devAssistantChat": [{
-        "id": "dev-assistant-ai.chat",
-        "name": "Chat",
-        "visibility": "visible",
-        "contextualTitle": "Chat",
-        "icon": "assets/img/dark-icon.png",
-        "type": "tree"
-      }],
-      "devAssistantViewContainer": [        
+    "views": {
+      "devAssistantChat": [
+        {
+          "id": "dev-assistant-ai.chat",
+          "name": "Chat",
+          "visibility": "visible",
+          "contextualTitle": "Chat",
+          "icon": "assets/img/dark-icon.png",
+          "type": "tree"
+        }
+      ],
+      "devAssistantViewContainer": [
         {
           "id": "dev-assistant-ai.conversations",
-          "name": "Dev Assistant chat history",
+          "name": "Chat history",
           "visibility": "visible",
           "contextualTitle": "Conversations",
           "icon": "assets/img/dark-icon.png",
@@ -126,7 +146,7 @@
           "icon": "assets/img/dark-icon.png",
           "type": "tree"
         }
-      ]    
+      ]
     }
   },
   "scripts": {
@@ -181,7 +201,7 @@
     }
   },
   "activationEvents": [
-    "onStartupFinished"
+    "onStartupFinished",
+    "onWebviewPanel:devAssistantChat"
   ]
 }
-
