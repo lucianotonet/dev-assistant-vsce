@@ -1,12 +1,11 @@
 import * as vscode from 'vscode';
 import * as Ably from 'ably';
-import { machineIdSync } from 'node-machine-id';
-import { ApiHandler } from './apiHandler';
+import { ApiHandler } from './ApiHandler';
 import axios from 'axios';
 import { DEV_ASSISTANT_SERVER, API_URL } from './utils';
 import fetch from 'node-fetch';
-import { AuthHandler } from './authHandler';
-import { IOHandler } from './IOHandler';
+import { InstructionHandler } from './InstructionHandler';
+import { AuthHandler } from './AuthHandler';
 
 
 interface TokenResponse {
@@ -27,22 +26,18 @@ export class AblyHandler {
     }
 
     public async getTokenRequest(context: vscode.ExtensionContext): Promise<any> {
-        const apiHandler = ApiHandler.getInstance();
-        const authHandler = AuthHandler.getInstance();
+        const apiHandler = ApiHandler.getInstance(context);
+        const authHandler = AuthHandler.getInstance(context);
         
-        const token = await authHandler.retrieveToken(context, 'devAssistant.client.accessToken');
-        const clientId = await authHandler.retrieveToken(context, 'devAssistant.client.id');
+        const token = await authHandler.retrieveToken('devAssistant.client.accessToken');
+        const clientId = await authHandler.retrieveToken('devAssistant.client.id');
 
         if (!token || !clientId) {
             throw new Error('Token or clientId is undefined');
         }
 
-        if (token) {
-            const response = await apiHandler.getWithToken(`${DEV_ASSISTANT_SERVER}/auth/clients/${clientId}/ably`, token);
-            return response.data;
-        } else {
-            throw new Error('Token is undefined');
-        }
+        const response = await apiHandler.get(`${DEV_ASSISTANT_SERVER}/auth/clients/${clientId}/ably`);
+        return response.data;
     }
 
     public async init(context: vscode.ExtensionContext): Promise<void> {
@@ -75,21 +70,31 @@ export class AblyHandler {
                 vscode.window.showErrorMessage(`An error occurred while initializing Ably: ${error}`);
                 return;
             }
-        }
-        const authHandler = AuthHandler.getInstance();
-        const clientId = await authHandler.retrieveToken(context, 'devAssistant.client.id');
-        this.ablyChannel = this.ablyRealtime.channels.get(`private:dev-assistant-${clientId}`);
-        if (!this.ablyChannel) {
-            vscode.window.showErrorMessage('Failed to initialize private channel.');
+        } else {
+            vscode.window.showErrorMessage('Failed to get token request.');
             return;
         }
-        this.ablyChannel.subscribe(this.handleAblyMessage.bind(this, context));
-        vscode.window.showInformationMessage('Dev Assistant is ready!');
+        const authHandler = AuthHandler.getInstance(context);
+        const clientId = await authHandler.retrieveToken('devAssistant.client.id');
+        if (this.ablyRealtime) {
+            this.ablyChannel = this.ablyRealtime.channels.get(`private:dev-assistant-${clientId}`);
+            if (!this.ablyChannel) {
+                vscode.window.showErrorMessage('Failed to initialize private channel.');
+                return;
+            }
+            this.ablyChannel.subscribe(this.handleAblyMessage.bind(this, context));
+            vscode.window.showInformationMessage('Dev Assistant is ready!');
+        } else {
+            vscode.window.showErrorMessage('Ably Realtime is not initialized.');
+        }
     }
 
     private handleAblyMessage(context: vscode.ExtensionContext, message: any): void {
-        vscode.window.showInformationMessage('Dev Assistant: \n' + message.data.feedback);
-        const commandOrchestrator = IOHandler.getInstance();
+        // Verifica se message.data e message.data.feedback existem antes de tentar acessá-los
+        if (message.data && message.data.feedback) {
+            vscode.window.showInformationMessage('Dev Assistant: \n' + message.data.feedback);
+        }
+        const commandOrchestrator = InstructionHandler.getInstance(context);
         const instruction = message.data;
         commandOrchestrator.executeCommand(context, instruction);
     }
@@ -104,8 +109,8 @@ export class AblyHandler {
    
     // 1. Get the TOKEN REQUEST
     private async getAblyTokenRequest(context: vscode.ExtensionContext): Promise<string> {
-        const authHandler = AuthHandler.getInstance();
-        const clientId = await authHandler.retrieveToken(context, 'devAssistant.client.id');
+        const authHandler = AuthHandler.getInstance(context);
+        const clientId = await authHandler.retrieveToken('devAssistant.client.id');
         const url = `${API_URL}/auth/clients/${clientId}/ably`;
         try {
             const response = await fetch(url);
@@ -118,9 +123,9 @@ export class AblyHandler {
     }
 
     // 2. Connect to Ably
-    private async connectToAbly(token: string) {
+    private async connectToAbly(context: vscode.ExtensionContext, token: string) {
         const ably = new Ably.Realtime({ token });
-        const clientId = AuthHandler.getInstance().getClientId();
+        const clientId = AuthHandler.getInstance(context).getClientId();
         const channelName = `private:dev-assistant-${clientId}`;
         const channel = ably.channels.get(channelName);
 
@@ -139,7 +144,7 @@ export class AblyHandler {
     private async initializeAbly(context: vscode.ExtensionContext) {
         try {
             const tokenRequest = await this.getAblyTokenRequest(context);
-            this.connectToAbly(tokenRequest);
+            this.connectToAbly(context, tokenRequest);
         } catch (error) {
             console.error('Failed to initialize Ably:', error);
         }

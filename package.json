@@ -55,9 +55,28 @@
       {
         "command": "dev-assistant-ai.openConversation",
         "title": "Open Conversation"
+      },
+      {
+        "command": "dev-assistant-ai.triggerInlineCompletion",
+        "title": "Trigger Inline Completion"
+      },
+      {
+        "command": "dev-assistant-ai.showMagicInput",
+        "title": "Show Magic Input"
+      },
+      {
+        "command": "dev-assistant-ai.openChat",
+        "title": "Open Chat"
       }
     ],
-    "keybindings": [],
+    "keybindings": [
+      {
+        "command": "dev-assistant-ai.triggerInlineCompletion",
+        "key": "ctrl+alt+enter",
+        "mac": "cmd+alt+enter",
+        "when": "editorTextFocus"
+      }
+    ],
     "menus": {
       "view/title": []
     },
@@ -68,21 +87,46 @@
           "title": "Dev Assistant AI",
           "icon": "assets/img/dark-icon.png"
         }
-      ]
-    },
-    "views": {
-      "devAssistantViewContainer": [
+      ],
+      "panel": [
         {
-          "id": "dev-assistant-ai.chatView",
-          "name": "Dev Assistant AI Chat",
-          "visibility": "visible"
-        },
-        {
-          "id": "dev-assistant-ai.settingsView",
-          "name": "Settings",
-          "visibility": "visible"
+          "id": "devAssistantChat",
+          "name": "Chat",
+          "visibility": "visible",
+          "contextualTitle": "Chat",
+          "icon": "assets/img/dark-icon.png",
+          "type": "tree",
+          "title": "Chat"
         }
       ]
+    },
+    "views": {   
+      "devAssistantChat": [{
+        "id": "dev-assistant-ai.chat",
+        "name": "Chat",
+        "visibility": "visible",
+        "contextualTitle": "Chat",
+        "icon": "assets/img/dark-icon.png",
+        "type": "tree"
+      }],
+      "devAssistantViewContainer": [        
+        {
+          "id": "dev-assistant-ai.conversations",
+          "name": "Dev Assistant chat history",
+          "visibility": "visible",
+          "contextualTitle": "Conversations",
+          "icon": "assets/img/dark-icon.png",
+          "type": "tree"
+        },
+        {
+          "id": "dev-assistant-ai.settings",
+          "name": "Settings",
+          "visibility": "visible",
+          "contextualTitle": "Settings",
+          "icon": "assets/img/dark-icon.png",
+          "type": "tree"
+        }
+      ]    
     }
   },
   "scripts": {
@@ -100,23 +144,23 @@
     "clean-tests": "rimraf out"
   },
   "devDependencies": {
-    "@types/chai": "^4.3.6",
+    "@types/chai": "^4.3.11",
     "@types/glob": "^8.1.0",
-    "@types/mocha": "^10.0.1",
+    "@types/mocha": "^10.0.6",
     "@types/node": "16.x",
-    "@types/uuid": "^9.0.4",
-    "@types/vscode": "^1.80.0",
-    "@typescript-eslint/eslint-plugin": "^5.56.0",
-    "@typescript-eslint/parser": "^5.56.0",
-    "@vscode/test-electron": "^2.3.0",
+    "@types/uuid": "^9.0.7",
+    "@types/vscode": "^1.85.0",
+    "@typescript-eslint/eslint-plugin": "^6.18.1",
+    "@typescript-eslint/parser": "^6.18.1",
+    "@vscode/test-electron": "^2.3.8",
     "dotenv-webpack": "^8.0.1",
-    "eslint": "^8.36.0",
+    "eslint": "^8.56.0",
     "glob": "^8.1.0",
     "husky": "^8.0.3",
     "mocha": "^10.2.0",
     "ts-loader": "^9.4.2",
-    "typescript": "^4.9.5",
-    "webpack": "^5.76.3",
+    "typescript": "^5.3.3",
+    "webpack": "^5.89.0",
     "webpack-cli": "^5.0.1"
   },
   "dependencies": {
@@ -135,5 +179,9 @@
     "hooks": {
       "pre-commit": "yarn version --patch && git add package.json"
     }
-  }
+  },
+  "activationEvents": [
+    "onStartupFinished"
+  ]
 }
+

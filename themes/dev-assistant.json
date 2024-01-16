@@ -1,0 +1,15 @@
+{
+    "name": "Dev Assistant",
+    "colors": {
+        "editorGhostText.foreground": "#32CD32"
+    },
+    "tokenColors": [
+        {
+            "scope": "editorGhostText",
+            "settings": {
+                "foreground": "#32CD32"
+            }
+        }
+    ]
+}
+
