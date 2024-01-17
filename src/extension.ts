@@ -2,8 +2,6 @@ import * as vscode from 'vscode';
 import { capture } from './utils/Utilities';
 import { AuthHandler } from './auth/AuthHandler';
 import { CommandRegistrar } from './commands/CommandRegistrar';
-import { ConversationsDataProvider } from './chat/ConversationsDataProvider';
-
 
 export async function activate(context: vscode.ExtensionContext) {
 

@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import { getNonce, getWebviewOptions } from '../utils/Utilities';
 
 const cats = {
     'Coding Cat': 'https://media.giphy.com/media/JIX9t2j0ZTN9S/giphy.gif',
@@ -6,25 +7,6 @@ const cats = {
     'Pokerface Cat': 'https://i.giphy.com/SrAO8XBZ7mPSWzpERP.webp',
     'Sad Cat': 'https://i.giphy.com/71PLYtZUiPRg4.webp'
 };
-
-function getWebviewOptions(extensionUri: vscode.Uri): vscode.WebviewOptions {
-    return {
-        // Enable javascript in the webview
-        enableScripts: true,
-
-        // And restrict the webview to only loading content from our extension's `media` directory.
-        localResourceRoots: [vscode.Uri.joinPath(extensionUri, 'assets')]
-    };
-}
-
-function getNonce() {
-    let text = '';
-    const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    for (let i = 0; i < 32; i++) {
-        text += possible.charAt(Math.floor(Math.random() * possible.length));
-    }
-    return text;
-}
 
 export class Chat {
     /**

@@ -67,25 +67,15 @@
         "category": "Dev Assistant AI"
       },
       {
-        "command": "dev-assistant-ai.showMagicInput",
-        "title": "Show Magic Input",
-        "category": "Dev Assistant AI"
-      },
-      {
         "command": "dev-assistant-ai.openChat",
         "title": "Open Chat",
         "category": "Dev Assistant AI"
       },
       {
-				"command": "dev-assistant-ai.start",
-				"title": "Start chat session",
-				"category": "Dev Assistant AI"
-			},
-			{
-				"command": "dev-assistant-ai.doAction",
-				"title": "Excute an action",
-				"category": "Dev Assistant AI"
-			}
+        "command": "dev-assistant-ai.doAction",
+        "title": "Excute an action",
+        "category": "Dev Assistant AI"
+      }
     ],
     "keybindings": [
       {
@@ -95,26 +85,24 @@
         "when": "editorTextFocus"
       }
     ],
-    "menus": {
-      "view/title": []
-    },
+    "menus": {},
     "viewsContainers": {
       "activitybar": [
         {
           "id": "devAssistantViewContainer",
           "title": "Dev Assistant AI",
-          "icon": "assets/img/dark-icon.png"    
+          "icon": "assets/img/dark-icon.png"
         }
       ],
       "panel": [
         {
           "id": "devAssistantChat",
-          "name": "Chat",
+          "name": "Dev Assistant Chat",
           "visibility": "visible",
-          "contextualTitle": "Chat",
+          "contextualTitle": "Dev Assistant Chat",
           "icon": "assets/img/dark-icon.png",
           "type": "tree",
-          "title": "Chat"
+          "title": "Dev Assistant Chat"
         }
       ]
     },
@@ -122,11 +110,11 @@
       "devAssistantChat": [
         {
           "id": "dev-assistant-ai.chat",
-          "name": "Chat",
+          "name": "Dev Assistant Chat",
           "visibility": "visible",
-          "contextualTitle": "Chat",
+          "contextualTitle": "Dev Assistant Chat",
           "icon": "assets/img/dark-icon.png",
-          "type": "tree"
+          "type": "webview"
         }
       ],
       "devAssistantViewContainer": [
@@ -141,10 +129,10 @@
         {
           "id": "dev-assistant-ai.settings",
           "name": "Settings",
-          "visibility": "visible",
+          "visibility": "collapsed",
           "contextualTitle": "Settings",
           "icon": "assets/img/dark-icon.png",
-          "type": "tree"
+          "type": "webview"
         }
       ]
     }

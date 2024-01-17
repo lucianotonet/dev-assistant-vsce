@@ -2,35 +2,31 @@
 @import 'tailwindcss/components';
 @import 'tailwindcss/utilities';
 
-body > div{
-    display: flex;
-    flex-direction: column;
-    margin: 0 auto;
-    padding: 12px;
-    max-width: 480px;
-    margin: 0 auto;
-    min-height: 100vh;
-    gap: 6px;	
-}
-
-#chatForm {
-    display: flex;
-    flex-direction: column;
-    justify-self: end;
-    margin-top: auto;
-	gap: 6px;	
-}
-
 :root {
-	--container-padding: 20px;
-	--input-padding-vertical: 6px;
-	--input-padding-horizontal: 4px;
-	--input-margin-vertical: 4px;
+	--container-padding: 12px;
+	--input-padding-vertical: 8px;
+	--input-padding-horizontal: 6px;
+	--input-margin-vertical: 6px;
 	--input-margin-horizontal: 0;
 }
 
+body, html {
+	padding: 0;
+	margin: 0;
+}
+
+body > div{
+    display: flex;
+    flex-direction: column;    
+    padding: 0;   
+    margin: 0;
+    min-height: 100vh;
+	max-height: 100vh;
+	overflow-y: auto;
+}
+
 body {
-	padding: 0 var(--container-padding);
+	padding: 0;
 	color: var(--vscode-foreground);
 	font-size: var(--vscode-font-size);
 	font-weight: var(--vscode-font-weight);
@@ -38,13 +34,8 @@ body {
 	background-color: var(--vscode-editor-background);
 }
 
-ol,
-ul {
-	padding-left: var(--container-padding);
-}
-
-body > *,
-form > * {
+body>*,
+form>* {
 	margin-block-start: var(--input-margin-vertical);
 	margin-block-end: var(--input-margin-vertical);
 }
@@ -111,4 +102,50 @@ textarea {
 input::placeholder,
 textarea::placeholder {
 	color: var(--vscode-input-placeholderForeground);
+}
+
+.container {
+	width: 100%;
+	max-width: 520px;
+	margin: 0 auto;
+	padding: var(--container-padding);
+}
+
+
+#chat {
+	display: flex;
+	height: auto;
+	flex-grow: 1;
+	flex-direction: column;	
+	padding-bottom: 60px;	
+}
+
+#chat li {
+	padding: var(--input-padding-horizontal);
+}
+
+#chat li.assistant {
+	background-color: rgba(240, 255, 255, 0.007);	
+}
+
+#chat li div > strong {	
+	text-transform: uppercase;
+	vertical-align: text-top;
+	font-size: 10px !important;	
+}
+
+#chatForm {
+	display: flex;
+	background-color: var(--vscode-editor-background);
+	position: sticky;
+	bottom: 0;
+	width: 100%;
+}
+
+#chatForm > .container {
+    display: flex;
+    flex-direction: column;
+    justify-self: end;	
+	width: 100%;
+	gap: var(--input-margin-vertical);	
 }
