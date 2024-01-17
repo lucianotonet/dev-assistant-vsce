@@ -55,12 +55,7 @@
         "command": "dev-assistant-ai.deauth",
         "title": "Deauth",
         "category": "Dev Assistant AI"
-      },
-      {
-        "command": "dev-assistant-ai.openConversation",
-        "title": "Open Conversation",
-        "category": "Dev Assistant AI"
-      },
+      },      
       {
         "command": "dev-assistant-ai.triggerInlineCompletion",
         "title": "Trigger Inline Completion",

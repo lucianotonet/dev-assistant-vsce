@@ -111,6 +111,28 @@ textarea::placeholder {
 	padding: var(--container-padding);
 }
 
+.logo {
+	display: flex;
+	margin: 0 auto;
+	align-items: center;
+	justify-self: center;
+	font-family: 'Courier New', Courier, monospace, serif;
+	max-width: max-content;
+}
+
+.logo img {
+	max-width: 34px;
+	height: auto;
+}
+
+.logo span {
+	display: flex;
+	flex-direction: column;	
+}
+.logo h2 {
+	padding: 0;
+	margin: 0;
+}
 
 #chat {
 	display: flex;
@@ -140,6 +162,7 @@ textarea::placeholder {
 	position: sticky;
 	bottom: 0;
 	width: 100%;
+	transition: all ease-in-out 2s;
 }
 
 #chatForm > .container {

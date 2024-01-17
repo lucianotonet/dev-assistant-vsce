@@ -14,13 +14,25 @@ export class ApiHandler {
         return new ApiHandler(context);
     }
 
-    private async constructHeaders(): Promise<any> {
+    private async constructClientHeaders(): Promise<any> {
         const clientToken = await AuthHandler.getInstance(this.context).getSecret('devAssistant.client.accessToken');
         if (!clientToken) {
-            throw new Error('Token not found');
+            throw new Error('Client Token not found');
         }
         return {
             'Authorization': `Bearer ${clientToken}`,
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        };
+    }
+
+    private async constructHeaders(): Promise<any> {
+        const userToken = await AuthHandler.getInstance(this.context).getSecret('devAssistant.user.accessToken');
+        if (!userToken) {
+            throw new Error('User Token not found');
+        }
+        return {
+            'Authorization': `Bearer ${userToken}`,
             'Content-Type': 'application/json',
             'Accept': 'application/json'
         };
@@ -73,6 +85,26 @@ export class ApiHandler {
         } catch (error) {
             vscode.window.showErrorMessage('Failed to fetch messages');
             return null;
+        }
+    }
+
+    public async sendMessage(conversationId: string | null, message: {content:string, role:string}): Promise<void|null> {
+        let endpoint = `${API_URL}/chat/`;
+        if (conversationId) {
+            endpoint += conversationId;
+        }
+        try {
+            let response;
+            if (conversationId) {
+                response = await this.put(endpoint, { content: message.content, role: message.role });
+            } else {
+                response = await this.post(endpoint, { content: message.content, role: message.role });
+            }
+            return response.data
+            // Handle the API response here, for example, updating the chat view
+        } catch (error) {
+            vscode.window.showErrorMessage(`Error sending message: ${error}`);
+            return null
         }
     }
 
