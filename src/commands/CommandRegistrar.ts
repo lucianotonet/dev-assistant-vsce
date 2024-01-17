@@ -185,6 +185,9 @@ export class CommandRegistrar {
         context.subscriptions.push(ghostCompletionDisposable);
         // context.subscriptions.push(ghostCompletionDisposable, chatDisposable);
 
+        const conversationsDataProvider = new ConversationsDataProvider(context);
+        vscode.window.registerTreeDataProvider('dev-assistant-ai.conversations', conversationsDataProvider);
+        vscode.commands.registerCommand('dev-assistant-ai.refreshConversations', () => conversationsDataProvider.refresh());
 
         context.subscriptions.push(
             vscode.commands.registerCommand('dev-assistant-ai.openChat', async (conversationId: string) => {

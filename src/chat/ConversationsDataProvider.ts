@@ -3,13 +3,16 @@ import { Conversation } from '../chat/Conversation';
 import { ApiHandler } from '../api/ApiHandler';
 
 export class ConversationsDataProvider implements vscode.TreeDataProvider<Conversation> {
+    static refresh(): any {
+        throw new Error('Method not implemented.');
+    }
     private apiHandler: ApiHandler;
     onDidChangeTreeData: any;
 
     constructor(private context: vscode.ExtensionContext) {
         this.apiHandler = ApiHandler.getInstance(context);
     
-        vscode.commands.registerCommand('dev-assistant-ai.refreshConversations', this.refresh.bind(this));
+        
     }
 
     refresh(): void {
