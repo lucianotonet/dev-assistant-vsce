@@ -1,6 +1,7 @@
 import * as vscode from 'vscode'
 import { getNonce, getWebviewOptions } from '../utils/Utilities';
 import { ApiHandler } from '../api/ApiHandler';
+import { AuthHandler } from '../auth/AuthHandler';
 
 export class DevAssistantChat {
     public static currentPanel: DevAssistantChat | undefined;
@@ -92,6 +93,17 @@ export class DevAssistantChat {
                         vscode.window.showErrorMessage(message.content);
                         return;
                     case 'sendMessage':
+                        const authHandler = AuthHandler.getInstance(this._context);
+                        const userToken = await authHandler.getSecret('devAssistant.user.accessToken');
+
+                        if (!userToken) {
+                            vscode.window.showErrorMessage('To use Dev Assistant you need to set an API KEY')
+                            this._conversation.id = null;
+                            this._conversation.messages = [];
+                            this._updateChat();
+                            return;
+                        }
+
                         if (!message.conversation_id) {
                             this._conversation.messages = []
                         }
