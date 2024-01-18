@@ -1,5 +1,6 @@
 import * as vscode from 'vscode'
 import { getNonce, getWebviewOptions } from '../utils/Utilities';
+import { ApiHandler } from '../api/ApiHandler';
 
 export class DevAssistantChat {
     public static currentPanel: DevAssistantChat | undefined;
@@ -8,52 +9,75 @@ export class DevAssistantChat {
     private readonly _panel: vscode.WebviewPanel;
     private readonly _extensionUri: vscode.Uri;
     private _disposables: vscode.Disposable[] = [];
-    private _conversationId: string | undefined = undefined;
-    private _messages: { content: string, role: string }[] = [];
-    private _messageInterval: NodeJS.Timeout | undefined = undefined;
+    private readonly _context: vscode.ExtensionContext;
+    private _conversation: { id: string | null, messages: { content: string, role: string }[] } = { id: null, messages: [] };
 
-    public static createOrShow(extensionUri: vscode.Uri, conversationId: string | undefined) {
-        const column = vscode.window.activeTextEditor
-            ? vscode.window.activeTextEditor.viewColumn
-            : undefined;
+    public static async createOrShow(context: vscode.ExtensionContext, conversationId: string | null) {
+        const column = vscode.window.activeTextEditor ? vscode.ViewColumn.Beside : undefined;
+        
+        // Se o painel atual não existir, crie um novo
+        if (!DevAssistantChat.currentPanel) {
+            const panel = vscode.window.createWebviewPanel(
+                DevAssistantChat.viewType,
+                'Dev Assistant',
+                column || vscode.ViewColumn.One,
+                getWebviewOptions(context.extensionUri),                
+            );
 
-        // If we already have a panel, show it.
-        if (DevAssistantChat.currentPanel) {
-            DevAssistantChat.currentPanel._panel.reveal(column);
-            return;
+            DevAssistantChat.currentPanel = new DevAssistantChat(panel, context);
+        } else {
+            // Se o painel atual existir, revele-o na mesma coluna que estava antes
+            DevAssistantChat.currentPanel._panel.reveal(DevAssistantChat.currentPanel._panel.viewColumn);
         }
 
-        // Otherwise, create a new panel.
-        const panel = vscode.window.createWebviewPanel(
-            DevAssistantChat.viewType,
-            'Dev Assistant',
-            column || vscode.ViewColumn.Nine,
-            getWebviewOptions(extensionUri),
-        );
-
-        DevAssistantChat.currentPanel = new DevAssistantChat(panel, extensionUri);
+        if (conversationId) {
+            DevAssistantChat.currentPanel.loadConversation(context, conversationId)
+        }
     }
 
-    public static revive(panel: vscode.WebviewPanel, extensionUri: vscode.Uri) {
-        DevAssistantChat.currentPanel = new DevAssistantChat(panel, extensionUri);
+    public static revive(panel: vscode.WebviewPanel, context: vscode.ExtensionContext, conversationId: string | null) {        
+        // Restaura o estado salvo, se houver
+        const savedConversation = conversationId ? { id: conversationId, messages: [] } : context.workspaceState.get<{ id: string, messages: { content: string, role: string }[] }>('conversation');
+
+        DevAssistantChat.currentPanel = new DevAssistantChat(panel, context);
+
+        if (savedConversation) {
+            DevAssistantChat.currentPanel._conversation = savedConversation;
+        }
+
+        // Atualiza as mensagens no webview
+        DevAssistantChat.currentPanel._updateChat();
     }
 
-    private constructor(panel: vscode.WebviewPanel, extensionUri: vscode.Uri) {
+    public constructor(panel: vscode.WebviewPanel, context: vscode.ExtensionContext) {
         this._panel = panel;
-        this._extensionUri = extensionUri;
+        this._extensionUri = context.extensionUri;
+        this._context = context;
+
+        // Define o ícone para o título do painel
+        this._panel.iconPath = {
+            light: vscode.Uri.joinPath(this._extensionUri, 'assets', 'img', 'light-icon.svg'),
+            dark: vscode.Uri.joinPath(this._extensionUri, 'assets', 'img', 'dark-icon.svg')
+        };
+
+        // Restaura o estado salvo, se houver
+        const savedConversation = context.workspaceState.get<{ id: string, messages: { content: string, role: string }[] }>('conversation');
+
+        if (savedConversation) {
+            this._conversation = savedConversation;
+        }
 
         // Set the webview's initial html content
-        this._update();
+        this._renderChat();
 
-        // Listen for when the panel is disposed
-        // This happens when the user closes the panel or when the panel is closed programmatically
-        this._panel.onDidDispose(() => this.dispose(), null, this._disposables);
-
-        // Update the content based on view changes
+        this._panel.onDidDispose(() => {
+            this.dispose()
+        }, null, this._disposables);
+        
         this._panel.onDidChangeViewState(
             e => {
-                if (this._panel.visible) {
-                    this._update();
+                if (e.webviewPanel.visible) {
+                    this._updateChat(); // Atualiza os dados da conversa no webview
                 }
             },
             null,
@@ -62,36 +86,69 @@ export class DevAssistantChat {
 
         // Handle messages from the webview
         this._panel.webview.onDidReceiveMessage(
-            message => {
+            async message => {
                 switch (message.command) {
                     case 'alert':
                         vscode.window.showErrorMessage(message.content);
                         return;
-                    case 'newMessage':
-                        this._messages.push(message); // Update the messages list when a new message is received
-                        vscode.window.showInformationMessage(`User message: ${message.content}`) // Debug notification with the user's message
-                        this._updateMessages(); // Update only the messages part of the DOM
+                    case 'sendMessage':
+                        if (!message.conversation_id) {
+                            this._conversation.messages = []
+                        }
+
+                        this._conversation.messages.push({
+                            content: message.content,
+                            role: message.role
+                        });
+
+                        this._updateChat();
+                        
+                        const response = await ApiHandler.getInstance(context).sendMessage(message);
+                        
+                        if (response) {
+                            this._conversation.messages.push({
+                                content: response['content'],
+                                role: response['role']
+                            })
+                            
+                            this._conversation.id = response['conversation_id']
+                            this._updateChat();
+                        } else {
+                            this._conversation.id = null
+                            this._conversation.messages = []
+                        }
+                        
+                        vscode.commands.executeCommand('dev-assistant-ai.refreshConversations')
                         return;
                 }
             },
             null,
             this._disposables
         );
-
-        // Simulate assistant messages every 2 seconds
-        this._messageInterval = setInterval(() => {
-            this._messages.push({ content: 'Simulated assistant message ad fashg as adfasdgfa srhadasxg adtgh.', role: 'assistant' });
-            this._updateMessages(); // Update only the messages part of the DOM
-        }, 1000);
     }
 
     public doAction() {
         // Send a message to the webview webview.
-        // You can send any JSON serializable data.
         this._panel.webview.postMessage({ command: 'refactor' });
     }
 
+    public async loadConversation(context: vscode.ExtensionContext, conversationId: string) {        
+        try {
+            this._conversation.id = conversationId;
+            const messages = await ApiHandler.getInstance(this._context).fetchMessages(this._conversation.id);
+            this._conversation.messages = messages;
+            this._updateChat();
+            
+        } catch (error) {
+            vscode.window.showErrorMessage(`Erro ao carregar mensagens: ${error}`);
+        }
+    }
+
     public dispose() {
+        // Salva o estado atual do chat
+        this._context.workspaceState.update('conversation.id', this._conversation.id);
+        this._context.workspaceState.update('conversation.messages', this._conversation.messages);
+
         DevAssistantChat.currentPanel = undefined;
 
         // Clean up our resources
@@ -103,26 +160,27 @@ export class DevAssistantChat {
                 x.dispose();
             }
         }
-
-        // Clear the message simulation interval
-        if (this._messageInterval) {
-            clearInterval(this._messageInterval);
-        }
     }
 
-    private _update() {
-        const webview = this._panel.webview;        
+    private _renderChat() {
+        const webview = this._panel.webview;
         this._panel.webview.html = this._getHtmlForWebview(webview);
-        return
     }
 
-    private _updateMessages() {
-        // Send a message to the webview with the updated messages
-        // The webview script will handle updating the DOM
-        // This approach avoids resetting the entire HTML content and preserves the input focus
-        this._panel.webview.postMessage({ command: 'updateMessages', messages: this._messages });
-    }
+    private _updateChat() {
+        if (!this._panel.webview) {
+            return;
+        }
 
+        this._panel.webview.postMessage({
+            command: 'updateChat',
+            conversation: {
+                id: this._conversation.id,
+                messages: this._conversation.messages
+            },
+        });
+    }
+        
     private _getHtmlForWebview(webview: vscode.Webview) {
         // Local path to main script run in the webview
         const scriptPathOnDisk = vscode.Uri.joinPath(this._extensionUri, 'assets', 'js', 'main.js');
@@ -140,6 +198,12 @@ export class DevAssistantChat {
 
         // Use a nonce to only allow specific scripts to be run
         const nonce = getNonce();
+
+        // Caminho local para o ícone do DevAssistant
+        const iconeDevAssistantPath = vscode.Uri.joinPath(this._extensionUri, 'assets', 'img', 'icon.png');
+
+        // E a uri que usamos para carregar este ícone no webview
+        const iconeDevAssistantUri = webview.asWebviewUri(iconeDevAssistantPath);
 
         return `<!DOCTYPE html>
 			<html lang="en">
@@ -162,12 +226,22 @@ export class DevAssistantChat {
 			<body>
                 <div class="">
                     <div class="container">
-                        <h2>Chat #123</h2>
+                        <h3 id="chatTitle"></h3>
                     </div>
 
-                    <ul id="chat"></ul>
+                    <ul id="chat">
+                        <div class="container">
+                            <div class="logo">
+                                <img src="${iconeDevAssistantUri}" height="34px"/>
+                                <span>
+                                    <h2>Dev Assistant</h2>
+                                    <small>Just another AI dev tool</small>
+                                </span>
+                            </div>
+                        </div>
+                    </ul>
 
-                    <form id="chatForm">
+                    <form id="chatForm" action="#" method="POST">
                         <div class="container">
                             <input type="text" id="input" placeholder="Type here..." required>                        
                             <button type="submit">Send</button>
@@ -175,9 +249,6 @@ export class DevAssistantChat {
                     </form>
                 </div>    
                 <script nonce="${nonce}" src="${scriptUri}"></script>
-                <script nonce="${nonce}">
-                    <!-- insert script here -->
-                </script>
 			</body>
 			</html>`;
     }

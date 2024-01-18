@@ -50,25 +50,20 @@ export class CommandRegistrar {
                 } else {
                     vscode.window.showInformationMessage('Nenhum editor ativo.');
                 }
-            }),
-            vscode.commands.registerCommand('dev-assistant-ai.openChat', async (conversationId: string) => {
-                await DevAssistantChat.createOrShow(context, conversationId)
+            })
+        );
+
+        const conversationsDataProvider = new ConversationsDataProvider(context);
+        vscode.window.registerTreeDataProvider('dev-assistant-ai.conversations', conversationsDataProvider);
+
+        context.subscriptions.push(
+            vscode.commands.registerCommand('dev-assistant-ai.openChat', async (conversationId: string) => {                
+                await DevAssistantChat.createOrShow(context, conversationId)                
             }),
             vscode.commands.registerCommand('dev-assistant-ai.doAction', () => {
                 if (DevAssistantChat.currentPanel) {
                     DevAssistantChat.currentPanel.doAction();
                 }
-            })
-        );
-
-        
-        const conversationsDataProvider = new ConversationsDataProvider(context);
-        vscode.window.registerTreeDataProvider('dev-assistant-ai.conversations', conversationsDataProvider);
-        
-        context.subscriptions.push(
-            vscode.commands.registerCommand('dev-assistant-ai.sendMessage', async (message) => {
-                await ApiHandler.getInstance(context).sendMessage(message.conversation_id, message)
-                await vscode.commands.executeCommand('dev-assistant-ai.refreshConversations')
             }),
             vscode.commands.registerCommand('dev-assistant-ai.refreshConversations', () => {
                 conversationsDataProvider.refresh()
@@ -77,18 +72,18 @@ export class CommandRegistrar {
 
         // Extensions that support reviving should have an "onWebviewPanel:viewType" activation event and make sure that registerWebviewPanelSerializer is called during activation.
         // Only a single serializer may be registered at a time for a given viewType.
-        if (vscode.window.registerWebviewPanelSerializer) {
-            // Make sure we register a serializer in activation event
-            vscode.window.registerWebviewPanelSerializer(DevAssistantChat.viewType, {
-                async deserializeWebviewPanel(webviewPanel: vscode.WebviewPanel, state: any) {
-                    console.log(`Dev Assistant AI got state: ${state}`);
-                    // Reset the webview options so we use latest uri for `localResourceRoots`.
-                    webviewPanel.webview.options = getWebviewOptions(context.extensionUri);
-                    // Use the conversationId from the state
-                    const conversationId = state.conversationId;
-                    DevAssistantChat.revive(webviewPanel, context, conversationId);
-                }
-            });
-        }
+        // if (vscode.window.registerWebviewPanelSerializer) {
+        //     // Make sure we register a serializer in activation event
+        //     vscode.window.registerWebviewPanelSerializer(DevAssistantChat.viewType, {
+        //         async deserializeWebviewPanel(webviewPanel: vscode.WebviewPanel, state: any) {
+        //             console.log(`Dev Assistant AI got state: ${state}`);
+        //             // Reset the webview options so we use latest uri for `localResourceRoots`.
+        //             webviewPanel.webview.options = getWebviewOptions(context.extensionUri);
+        //             // Use the conversationId from the state
+        //             const conversationId = state.conversation.id;                    
+        //             DevAssistantChat.revive(webviewPanel, context, conversationId);
+        //         }
+        //     });
+        // }
     }
 }

@@ -121,8 +121,9 @@ textarea::placeholder {
 }
 
 .logo img {
-	max-width: 34px;
+	max-width: 30px;
 	height: auto;
+	margin-right: 8px;
 }
 
 .logo span {
@@ -162,7 +163,7 @@ textarea::placeholder {
 	position: sticky;
 	bottom: 0;
 	width: 100%;
-	transition: all ease-in-out 2s;
+	transition: all ease-in-out 0.2s;
 }
 
 #chatForm > .container {

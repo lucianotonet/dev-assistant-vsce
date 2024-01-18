@@ -88,14 +88,14 @@ export class ApiHandler {
         }
     }
 
-    public async sendMessage(conversationId: string | null, message: {content:string, role:string}): Promise<void|null> {
+    public async sendMessage(message: {conversation_id: string|null, content:string, role:string}): Promise<void|null> {
         let endpoint = `${API_URL}/chat/`;
-        if (conversationId) {
-            endpoint += conversationId;
+        if (message.conversation_id) {
+            endpoint += message.conversation_id;
         }
         try {
             let response;
-            if (conversationId) {
+            if (message.conversation_id) {
                 response = await this.put(endpoint, { content: message.content, role: message.role });
             } else {
                 response = await this.post(endpoint, { content: message.content, role: message.role });
