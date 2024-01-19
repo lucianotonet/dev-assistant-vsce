@@ -63,11 +63,8 @@ export class ApiHandler {
         return url.startsWith('http') ? url : `${API_URL}${url}`; // If url doesn't start with http or https, concatenate with API_URL
     }
 
-    public async fetchConversations(conversationId?: string) {
-        let endpoint = `${API_URL}/chat/`;
-        if (conversationId) {
-            endpoint += conversationId;
-        }
+    public async fetchConversations() {
+        let endpoint = `${API_URL}/chat`;
         try {
             const response = await this.get(endpoint);
             return response.data;
@@ -105,6 +102,17 @@ export class ApiHandler {
         } catch (error) {
             vscode.window.showErrorMessage(`Error sending message: ${error}`);
             return null
+        }
+    }
+
+    public async checkThreadRunsStatus(conversationId: string) {
+        let endpoint = `${API_URL}/chat/${conversationId}/runs`;
+        try {
+            const response = await this.get(endpoint);
+            return response.data;
+        } catch (error) {
+            vscode.window.showErrorMessage(`Error checking thread run status: ${error}`);
+            return null;
         }
     }
 

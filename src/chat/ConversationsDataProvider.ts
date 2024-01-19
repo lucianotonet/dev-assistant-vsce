@@ -26,7 +26,7 @@ export class ConversationsDataProvider implements vscode.TreeDataProvider<Conver
         } else {
             try {
                 // Busca as conversas usando o ApiHandler
-                const conversationsData = await this.apiHandler.fetchConversations();
+                let conversationsData = await this.apiHandler.fetchConversations();
 
                 if (conversationsData.length > 0) {
                     // Mapeia os dados recebidos para o modelo Conversation

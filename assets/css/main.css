@@ -1,7 +1,3 @@
-@import 'tailwindcss/base';
-@import 'tailwindcss/components';
-@import 'tailwindcss/utilities';
-
 :root {
 	--container-padding: 12px;
 	--input-padding-vertical: 8px;
@@ -123,7 +119,7 @@ textarea::placeholder {
 .logo img {
 	max-width: 30px;
 	height: auto;
-	margin-right: 8px;
+	margin-right: 10px;
 }
 
 .logo span {
@@ -135,23 +131,43 @@ textarea::placeholder {
 	margin: 0;
 }
 
-#chat {
+#chatHeading {	
+	background-color: var(--vscode-editor-background);
+	position: sticky;
+	top: 0;
+}
+
+#chatHeading .container {	
+	display: flex;
+	justify-content: space-between;
+}
+
+#chatTitle {
+	padding: 0;
+	margin: 0;
+}
+
+#chatStatus {
+	font-size: 8px;
+}
+
+#chatBody {
 	display: flex;
 	height: auto;
 	flex-grow: 1;
-	flex-direction: column;	
-	padding-bottom: 60px;	
+	flex-direction: column;
+	padding-bottom: 60px;
 }
 
-#chat li {
+#chatBody li {
 	padding: var(--input-padding-horizontal);
 }
 
-#chat li.assistant {
+#chatBody li.assistant {
 	background-color: rgba(240, 255, 255, 0.007);	
 }
 
-#chat li div > strong {	
+#chatBody li div > strong {	
 	text-transform: uppercase;
 	vertical-align: text-top;
 	font-size: 10px !important;	
@@ -164,12 +180,14 @@ textarea::placeholder {
 	bottom: 0;
 	width: 100%;
 	transition: all ease-in-out 0.2s;
+	padding: var(--input-margin-vertical) inherit;
 }
 
 #chatForm > .container {
     display: flex;
     flex-direction: column;
-    justify-self: end;	
-	width: 100%;
-	gap: var(--input-margin-vertical);	
+    justify-self: end;
+    width: 100%;
+    gap: var(--input-margin-vertical);
+	padding-bottom: 30px;
 }

@@ -12,10 +12,30 @@ export class DevAssistantChat {
     private _disposables: vscode.Disposable[] = [];
     private readonly _context: vscode.ExtensionContext;
     private _conversation: { id: string | null, messages: { content: string, role: string }[] } = { id: null, messages: [] };
+    private _intervalId: any;
+    private _runs: { 
+        id: string,
+        object: string, 
+        createdAt: number, 
+        threadId: string, 
+        assistantId: string, 
+        status: string, 
+        requiredAction: any, 
+        lastError: any, 
+        expiresAt: any, 
+        startedAt: number, 
+        cancelledAt: any, 
+        failedAt: any, 
+        completedAt: number, 
+        model: string, 
+        instructions: string, 
+        tools: any[], 
+        fileIds: any[], 
+        metadata: any[] 
+    }[] = [];
 
     public static async createOrShow(context: vscode.ExtensionContext, conversationId: string | null) {
         const column = vscode.window.activeTextEditor ? vscode.ViewColumn.Beside : undefined;
-        
         // Se o painel atual não existir, crie um novo
         if (!DevAssistantChat.currentPanel) {
             const panel = vscode.window.createWebviewPanel(
@@ -33,6 +53,10 @@ export class DevAssistantChat {
 
         if (conversationId) {
             DevAssistantChat.currentPanel.loadConversation(context, conversationId)
+        } else {
+            // reset 
+            DevAssistantChat.currentPanel._conversation.id = null
+            DevAssistantChat.currentPanel._conversation.messages = []
         }
     }
 
@@ -47,7 +71,43 @@ export class DevAssistantChat {
         }
 
         // Atualiza as mensagens no webview
+        DevAssistantChat.currentPanel.startCheckingConversationStatus()
         DevAssistantChat.currentPanel._updateChat();
+    }
+
+    public startCheckingConversationStatus() {
+        let i = 0; // Inicializa o incrementável i
+
+        const checkStatus = async () => {
+            if (this._conversation.id) {
+                const runs = await ApiHandler.getInstance(this._context).checkThreadRunsStatus(this._conversation.id);
+                this._runs = runs.data;
+
+                const status = this._runs[0].status
+                
+                // vscode.window.showInformationMessage(`RUN STATUS CHECK ${i++}: ${status}`);
+                this._panel.webview.postMessage({
+                    command: 'updateStatus',
+                    status: status
+                });
+
+                if (status == 'completed') {
+                    this.loadConversation(this._context, this._conversation.id);
+                    this._updateChat();
+                }
+
+                if (status != 'in_progress' && status != 'queued') {
+                    return;
+                }
+                
+            }
+
+            // Aguarda 1 segundo antes de verificar novamente
+            setTimeout(checkStatus, 1000);
+        }
+
+        // Inicia a verificação do status
+        checkStatus();
     }
 
     public constructor(panel: vscode.WebviewPanel, context: vscode.ExtensionContext) {
@@ -62,11 +122,14 @@ export class DevAssistantChat {
         };
 
         // Restaura o estado salvo, se houver
-        const savedConversation = context.workspaceState.get<{ id: string, messages: { content: string, role: string }[] }>('conversation');
+        // const savedConversation = context.workspaceState.get<{ id: string, messages: { content: string, role: string }[] }>('conversation');
 
-        if (savedConversation) {
-            this._conversation = savedConversation;
-        }
+        // if (savedConversation) {
+        //     this._conversation = savedConversation;
+        //     this.loadConversation(this._context, savedConversation.id);
+        // }
+        this._context.workspaceState.update('conversation.id', null);
+        this._context.workspaceState.update('conversation.messages', []);
 
         // Set the webview's initial html content
         this._renderChat();
@@ -78,6 +141,7 @@ export class DevAssistantChat {
         this._panel.onDidChangeViewState(
             e => {
                 if (e.webviewPanel.visible) {
+                    this.startCheckingConversationStatus()
                     this._updateChat(); // Atualiza os dados da conversa no webview
                 }
             },
@@ -92,10 +156,10 @@ export class DevAssistantChat {
                     case 'alert':
                         vscode.window.showErrorMessage(message.content);
                         return;
-                    case 'sendMessage':
+                    case 'newMessage':
                         const authHandler = AuthHandler.getInstance(this._context);
                         const userToken = await authHandler.getSecret('devAssistant.user.accessToken');
-
+                        
                         if (!userToken) {
                             vscode.window.showErrorMessage('To use Dev Assistant you need to set an API KEY')
                             this._conversation.id = null;
@@ -114,23 +178,21 @@ export class DevAssistantChat {
                         });
 
                         this._updateChat();
-                        
-                        const response = await ApiHandler.getInstance(context).sendMessage(message);
-                        
-                        if (response) {
-                            this._conversation.messages.push({
-                                content: response['content'],
-                                role: response['role']
-                            })
-                            
-                            this._conversation.id = response['conversation_id']
-                            this._updateChat();
+                                                
+                        const conversation_id = await ApiHandler.getInstance(this._context).sendMessage(message);
+
+                        if (conversation_id) {                          
+                            this._conversation.id = conversation_id
+                            this.loadConversation(this._context, conversation_id);
                         } else {
                             this._conversation.id = null
                             this._conversation.messages = []
                         }
                         
-                        vscode.commands.executeCommand('dev-assistant-ai.refreshConversations')
+                        this.startCheckingConversationStatus()
+                        this._updateChat();
+
+                        vscode.commands.executeCommand('dev-assistant-ai.refreshConversations')                        
                         return;
                 }
             },
@@ -144,11 +206,22 @@ export class DevAssistantChat {
         this._panel.webview.postMessage({ command: 'refactor' });
     }
 
-    public async loadConversation(context: vscode.ExtensionContext, conversationId: string) {        
+    public async loadConversation(context: vscode.ExtensionContext, conversationId: string) {                
         try {
-            this._conversation.id = conversationId;
-            const messages = await ApiHandler.getInstance(this._context).fetchMessages(this._conversation.id);
-            this._conversation.messages = messages;
+            this._panel.webview.postMessage({
+                command: 'updateStatus',
+                status: 'in_progress',                
+            });
+
+            const messages = await ApiHandler.getInstance(this._context).fetchMessages(conversationId);
+            this._conversation.id = conversationId;          
+            this._conversation.messages = messages;  
+
+            this._panel.webview.postMessage({
+                command: 'updateStatus',
+                status: 'completed'
+            });
+
             this._updateChat();
             
         } catch (error) {
@@ -165,6 +238,9 @@ export class DevAssistantChat {
 
         // Clean up our resources
         this._panel.dispose();
+
+        // Limpa o setInterval
+        clearInterval(this._intervalId);
 
         while (this._disposables.length) {
             const x = this._disposables.pop();
@@ -184,18 +260,20 @@ export class DevAssistantChat {
             return;
         }
 
-        this._panel.webview.postMessage({
-            command: 'updateChat',
-            conversation: {
-                id: this._conversation.id,
-                messages: this._conversation.messages
-            },
-        });
+        if (!!this._conversation.id) {
+            this._panel.webview.postMessage({
+                command: 'updateChat',
+                conversation: {
+                    id: this._conversation.id,
+                    messages: this._conversation.messages
+                },
+            });
+        }
     }
         
     private _getHtmlForWebview(webview: vscode.Webview) {
         // Local path to main script run in the webview
-        const scriptPathOnDisk = vscode.Uri.joinPath(this._extensionUri, 'assets', 'js', 'main.js');
+        const scriptPathOnDisk = vscode.Uri.joinPath(this._extensionUri, 'assets', 'js', 'chat.js');
 
         // And the uri we use to load this script in the webview
         const scriptUri = webview.asWebviewUri(scriptPathOnDisk);
@@ -212,7 +290,7 @@ export class DevAssistantChat {
         const nonce = getNonce();
 
         // Caminho local para o ícone do DevAssistant
-        const iconeDevAssistantPath = vscode.Uri.joinPath(this._extensionUri, 'assets', 'img', 'icon.png');
+        const iconeDevAssistantPath = vscode.Uri.joinPath(this._extensionUri, 'assets', 'img', 'icon.png');        
 
         // E a uri que usamos para carregar este ícone no webview
         const iconeDevAssistantUri = webview.asWebviewUri(iconeDevAssistantPath);
@@ -236,12 +314,15 @@ export class DevAssistantChat {
 				<title>Dev Assistant</title>
 			</head>
 			<body>
-                <div class="">
-                    <div class="container">
-                        <h3 id="chatTitle"></h3>
+                <div id="chatUI">
+                    <div id="chatHeading">
+                        <div class="container">
+                            <h3 id="chatTitle"></h3>
+                            <small id="chatStatus"></small>
+                        </div>
                     </div>
 
-                    <ul id="chat">
+                    <ul id="chatBody">
                         <div class="container">
                             <div class="logo">
                                 <img src="${iconeDevAssistantUri}" height="34px"/>
@@ -256,7 +337,7 @@ export class DevAssistantChat {
                     <form id="chatForm" action="#" method="POST">
                         <div class="container">
                             <input type="text" id="input" placeholder="Type here..." required>                        
-                            <button type="submit">Send</button>
+                            <button type="submit" id="sendButton">Send</button>
                         </div>
                     </form>
                 </div>    

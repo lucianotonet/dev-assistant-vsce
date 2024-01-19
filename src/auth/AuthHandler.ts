@@ -68,7 +68,7 @@ export class AuthHandler {
     }
 
     private async authenticateClient(context: vscode.ExtensionContext): Promise<void> {
-        let clientAuthResponse: any;
+        let clientAuthResponse: any;        
         try {
             const userToken = await this.getSecret('devAssistant.user.accessToken');
             clientAuthResponse = await axios.post(`${DEV_ASSISTANT_SERVER}/api/auth/clients`, { client_id: this.clientId }, {
@@ -78,7 +78,9 @@ export class AuthHandler {
                     'Accept': 'application/json'
                 }
             });
-        } catch (error) {
+        } catch (error: any) {
+            await this.deleteSecret('devAssistant.user.accessToken');
+            await this.deleteSecret('devAssistant.client.accessToken');
             vscode.window.showErrorMessage(`Erro ao autenticar a extensão: ${error}`);
             return;
         }

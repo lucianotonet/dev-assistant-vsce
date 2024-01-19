@@ -4,8 +4,7 @@ import { AuthHandler } from './auth/AuthHandler';
 import { CommandRegistrar } from './commands/CommandRegistrar';
 import { ConversationsDataProvider } from './chat/ConversationsDataProvider';
 
-export async function activate(context: vscode.ExtensionContext) {
-
+export async function activate(context: vscode.ExtensionContext) {    
     if (!context.globalState.get("hasBeenInstalled")) {
         context.globalState.update("hasBeenInstalled", true);
         capture({

@@ -1,7 +1,7 @@
 {
   "name": "dev-assistant-ai",
-  "displayName": "Dev Assistant AI",
-  "description": "Let ChatGPT streamline your programming tasks!",
+  "displayName": "Dev Assistant",
+  "description": "Just another AI dev tool",
   "version": "0.0.6",
   "icon": "assets/img/icon_nobg.png",
   "publisher": "lucianotonet",
@@ -20,7 +20,7 @@
   "main": "./dist/extension.js",
   "contributes": {
     "configuration": {
-      "title": "Dev Assistant AI",
+      "title": "Dev Assistant",
       "properties": {
         "devAssistant.serverUrl": {
           "type": "string",
@@ -39,37 +39,37 @@
       {
         "command": "dev-assistant-ai.welcome",
         "title": "Welcome",
-        "category": "Dev Assistant AI"
+        "category": "Dev Assistant"
       },
       {
         "command": "dev-assistant-ai.auth",
         "title": "Auth",
-        "category": "Dev Assistant AI"
+        "category": "Dev Assistant"
       },
       {
         "command": "dev-assistant-ai.callback",
         "title": "Callback",
-        "category": "Dev Assistant AI"
+        "category": "Dev Assistant"
       },
       {
         "command": "dev-assistant-ai.deauth",
         "title": "Deauth",
-        "category": "Dev Assistant AI"
+        "category": "Dev Assistant"
       },      
       {
         "command": "dev-assistant-ai.triggerInlineCompletion",
         "title": "Trigger Inline Completion",
-        "category": "Dev Assistant AI"
+        "category": "Dev Assistant"
       },
       {
         "command": "dev-assistant-ai.openChat",
         "title": "Open Chat",
-        "category": "Dev Assistant AI"
+        "category": "Dev Assistant"
       },
       {
         "command": "dev-assistant-ai.doAction",
         "title": "Excute an action",
-        "category": "Dev Assistant AI"
+        "category": "Dev Assistant"
       }
     ],
     "keybindings": [
@@ -85,19 +85,19 @@
       "activitybar": [
         {
           "id": "devAssistantViewContainer",
-          "title": "Dev Assistant AI",
+          "title": "Dev Assistant",
           "icon": "assets/img/dark-icon.png"
         }
       ],
       "panel": [
         {
           "id": "devAssistantChat",
-          "name": "Dev Assistant Chat",
+          "name": "Dev Assistant",
           "visibility": "visible",
-          "contextualTitle": "Dev Assistant Chat",
+          "contextualTitle": "Dev Assistant",
           "icon": "assets/img/dark-icon.png",
           "type": "tree",
-          "title": "Dev Assistant Chat"
+          "title": "Dev Assistant"
         }
       ]
     },
@@ -105,9 +105,9 @@
       "devAssistantChat": [
         {
           "id": "dev-assistant-ai.chat",
-          "name": "Dev Assistant Chat",
+          "name": "Dev Assistant",
           "visibility": "visible",
-          "contextualTitle": "Dev Assistant Chat",
+          "contextualTitle": "Dev Assistant",
           "icon": "assets/img/dark-icon.png",
           "type": "webview"
         }
