@@ -11,8 +11,8 @@
   },
   "license": "MIT",
   "engines": {
-    "vscode": "^1.80.0",
-    "cursor": "^0.10.4"
+    "vscode": "^1.85.1",
+    "cursor": "^0.22.2"
   },
   "categories": [
     "Other"
