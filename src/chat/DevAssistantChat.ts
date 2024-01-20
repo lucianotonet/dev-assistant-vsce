@@ -179,7 +179,11 @@ export class DevAssistantChat {
 
                         this._updateChat();
                                                 
-                        const conversationId = await ApiHandler.getInstance(this._context).sendMessage(message);
+                        const conversationId = await ApiHandler.getInstance(this._context).sendMessage({
+                            conversationId: message.conversation_id,
+                            content: message.content,
+                            role: message.role
+                        });
 
                         if (conversationId) {                          
                             this._conversation.id = conversationId;
