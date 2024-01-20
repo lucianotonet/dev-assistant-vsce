@@ -55,7 +55,7 @@
         "command": "dev-assistant-ai.deauth",
         "title": "Deauth",
         "category": "Dev Assistant"
-      },      
+      },
       {
         "command": "dev-assistant-ai.triggerInlineCompletion",
         "title": "Trigger Inline Completion",
@@ -167,9 +167,12 @@
     "webpack-cli": "^5.0.1"
   },
   "dependencies": {
+    "@types/dompurify": "^3.0.5",
     "ably": "^1.2.44",
     "bufferutil": "^4.0.7",
+    "dompurify": "^3.0.8",
     "dotenv": "^16.3.1",
+    "marked": "^11.1.1",
     "node-fetch": "^3.3.2",
     "node-machine-id": "^1.1.12",
     "openai": "^4.6.0",

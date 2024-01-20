@@ -2,7 +2,6 @@
 // Este script será executado dentro do próprio webview
 // Ele não pode acessar as principais APIs do VS Code diretamente.
 (function () {
-    
     const vscode = acquireVsCodeApi();
     const oldState = vscode.getState();
     const chatUI = document.getElementById('chatUI');
@@ -73,10 +72,13 @@
                     li.classList.add(msg.role);
 
                     let name = msg.role == "assistant" ? "Dev Assistant" : "You"
-                    li.innerHTML = `<div class="container"><strong>${name}:</strong><br/>${msg.content[0].text.value}</div>`;
+
+                    li.innerHTML = `<div class="container"><strong>${name}:</strong><br/>${msg.html}</div>`;
 
                     if (chatBody) chatBody.appendChild(li);
                 });
+
+                hljs.highlightAll();
 
                 // Scroll automático para baixo no #chat
                 if (chatUI) {
@@ -111,4 +113,5 @@
             });            
         }
     });
+
 }());

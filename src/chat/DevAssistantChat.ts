@@ -2,6 +2,7 @@ import * as vscode from 'vscode'
 import { getNonce, getWebviewOptions } from '../utils/Utilities';
 import { ApiHandler } from '../api/ApiHandler';
 import { AuthHandler } from '../auth/AuthHandler';
+import { marked } from 'marked'; // Import the marked library for Markdown parsing
 
 export class DevAssistantChat {
     public static currentPanel: DevAssistantChat | undefined;
@@ -18,7 +19,6 @@ export class DevAssistantChat {
         object: string, 
         createdAt: number, 
         threadId: string, 
-        assistantId: string, 
         status: string, 
         requiredAction: any, 
         lastError: any, 
@@ -214,8 +214,14 @@ export class DevAssistantChat {
             });
 
             const messages = await ApiHandler.getInstance(this._context).fetchMessages(conversationId);
-            this._conversation.id = conversationId;          
-            this._conversation.messages = messages;  
+            this._conversation.id = conversationId;    
+            
+            this._conversation.messages = messages.map((message: any) => {
+                return {
+                    ...message,
+                    html: marked(message.content[0].text.value)
+                };
+            });
 
             this._panel.webview.postMessage({
                 command: 'updateStatus',
@@ -271,7 +277,19 @@ export class DevAssistantChat {
         }
     }
         
-    private _getHtmlForWebview(webview: vscode.Webview) {
+    private _getHtmlForWebview(webview: vscode.Webview) {        
+        
+        // Local path to main script run in the webview
+        const highlightJsScriptPathOnDisk = vscode.Uri.joinPath(this._extensionUri, 'assets', 'js', 'highlight.js', 'highlight.min.js');
+        // Obtenha a preferência de tema do usuário
+        const userThemePreference = vscode.workspace.getConfiguration('workbench').get('colorTheme') as string;
+        const theme = userThemePreference.includes('light') ? 'light' : 'dark';
+        
+        const highlightJsStylesPathOnDisk = vscode.Uri.joinPath(this._extensionUri, 'assets', 'js', 'highlight.js', `atom-one-${theme}.min.css`);
+    
+        const highlightJsScriptUri = webview.asWebviewUri(highlightJsScriptPathOnDisk);
+        const highlightJsStylesUri = webview.asWebviewUri(highlightJsStylesPathOnDisk);
+    
         // Local path to main script run in the webview
         const scriptPathOnDisk = vscode.Uri.joinPath(this._extensionUri, 'assets', 'js', 'chat.js');
 
@@ -310,6 +328,9 @@ export class DevAssistantChat {
 
 				<link href="${stylesResetUri}" rel="stylesheet">
 				<link href="${stylesMainUri}" rel="stylesheet">
+                
+                <!-- Highlight.js CSS -->
+				<link href="${highlightJsStylesUri}" rel="stylesheet">                
 
 				<title>Dev Assistant</title>
 			</head>
@@ -341,6 +362,18 @@ export class DevAssistantChat {
                         </div>
                     </form>
                 </div>    
+
+                <!-- Highlight.js -->
+                <script nonce="${nonce}" src="${highlightJsScriptUri}"></script>
+
+                <!-- Inicialização do Highlight.js -->
+                <script nonce="${nonce}">
+                    document.addEventListener('DOMContentLoaded', (event) => {
+                        hljs.highlightAll();
+                    });
+                </script>
+
+                <!-- Chat -->
                 <script nonce="${nonce}" src="${scriptUri}"></script>
 			</body>
 			</html>`;
