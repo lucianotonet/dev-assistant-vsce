@@ -58,7 +58,7 @@ export class CommandRegistrar {
 
         context.subscriptions.push(
             vscode.commands.registerCommand('dev-assistant-ai.openChat', async (conversationId: string) => {                
-                await DevAssistantChat.createOrShow(context, conversationId)                
+                await DevAssistantChat.createOrShow(context, conversationId);                
             }),
             vscode.commands.registerCommand('dev-assistant-ai.doAction', () => {
                 if (DevAssistantChat.currentPanel) {
@@ -66,7 +66,7 @@ export class CommandRegistrar {
                 }
             }),
             vscode.commands.registerCommand('dev-assistant-ai.refreshConversations', () => {
-                conversationsDataProvider.refresh()
+                conversationsDataProvider.refresh();
             })
         );
 

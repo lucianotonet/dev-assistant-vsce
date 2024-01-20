@@ -20,9 +20,9 @@ export class ApiHandler {
             throw new Error('Client Token not found');
         }
         return {
-            'Authorization': `Bearer ${clientToken}`,
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
+            'authorization': `Bearer ${clientToken}`,
+            'contentType': 'application/json',
+            'accept': 'application/json'
         };
     }
 
@@ -32,9 +32,9 @@ export class ApiHandler {
             throw new Error('User Token not found');
         }
         return {
-            'Authorization': `Bearer ${userToken}`,
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
+            'authorization': `Bearer ${userToken}`,
+            'contentType': 'application/json',
+            'accept': 'application/json'
         };
     }
 
@@ -85,23 +85,23 @@ export class ApiHandler {
         }
     }
 
-    public async sendMessage(message: {conversation_id: string|null, content:string, role:string}): Promise<void|null> {
+    public async sendMessage(message: {conversationId: string|null, content:string, role:string}): Promise<void|null> {
         let endpoint = `${API_URL}/chat/`;
-        if (message.conversation_id) {
-            endpoint += message.conversation_id;
+        if (message.conversationId) {
+            endpoint += message.conversationId;
         }
         try {
             let response;
-            if (message.conversation_id) {
+            if (message.conversationId) {
                 response = await this.put(endpoint, { content: message.content, role: message.role });
             } else {
                 response = await this.post(endpoint, { content: message.content, role: message.role });
             }
-            return response.data
+            return response.data;
             // Handle the API response here, for example, updating the chat view
         } catch (error) {
             vscode.window.showErrorMessage(`Error sending message: ${error}`);
-            return null
+            return null;
         }
     }
 

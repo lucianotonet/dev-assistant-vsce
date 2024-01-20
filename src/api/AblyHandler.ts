@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import * as Ably from 'ably';
 import { ApiHandler } from './ApiHandler';
 import axios from 'axios';
-import { DEV_ASSISTANT_SERVER, API_URL } from '../utils/Utilities'
+import { DEV_ASSISTANT_SERVER, API_URL } from '../utils/Utilities';
 import fetch from 'node-fetch';
 import { InstructionHandler } from '../io/InstructionHandler';
 import { AuthHandler } from '../auth/AuthHandler';

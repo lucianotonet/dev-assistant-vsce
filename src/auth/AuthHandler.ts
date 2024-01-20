@@ -1,10 +1,10 @@
 import * as vscode from 'vscode';
 import { DEV_ASSISTANT_SERVER } from '../utils/Utilities';
-import { ApiHandler } from '../api/ApiHandler'
+import { ApiHandler } from '../api/ApiHandler';
 import axios from 'axios';
 
 export class AuthHandler {
-    private apiHandler
+    private apiHandler;
     private clientId: string | undefined; // Adicionado para armazenar o clientId
     private context: vscode.ExtensionContext;
 
@@ -35,7 +35,7 @@ export class AuthHandler {
 
         if (userToken) {
             await this.authenticateClient(context);
-            return
+            return;
         }
 
         const appName = vscode.env.appName;
@@ -71,11 +71,11 @@ export class AuthHandler {
         let clientAuthResponse: any;        
         try {
             const userToken = await this.getSecret('devAssistant.user.accessToken');
-            clientAuthResponse = await axios.post(`${DEV_ASSISTANT_SERVER}/api/auth/clients`, { client_id: this.clientId }, {
+            clientAuthResponse = await axios.post(`${DEV_ASSISTANT_SERVER}/api/auth/clients`, { clientId: this.clientId }, {
                 'headers': {
-                    'Authorization': `Bearer ${userToken}`,
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json'
+                    'authorization': `Bearer ${userToken}`,
+                    'contentType': 'application/json',
+                    'accept': 'application/json'
                 }
             });
         } catch (error: any) {
@@ -92,7 +92,7 @@ export class AuthHandler {
 
         vscode.window.showInformationMessage(`Extenção autenticada com sucesso!`);
 
-        this.fetchUser(context)
+        this.fetchUser(context);
     }
 
     private async fetchUser(context: vscode.ExtensionContext): Promise<void> {

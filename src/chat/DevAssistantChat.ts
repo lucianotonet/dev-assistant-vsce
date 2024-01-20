@@ -1,4 +1,4 @@
-import * as vscode from 'vscode'
+import * as vscode from 'vscode';
 import { getNonce, getWebviewOptions } from '../utils/Utilities';
 import { ApiHandler } from '../api/ApiHandler';
 import { AuthHandler } from '../auth/AuthHandler';
@@ -6,7 +6,7 @@ import { marked } from 'marked'; // Import the marked library for Markdown parsi
 
 export class DevAssistantChat {
     public static currentPanel: DevAssistantChat | undefined;
-    public static readonly viewType = 'devAssistantChat'
+    public static readonly viewType = 'devAssistantChat';
 
     private readonly _panel: vscode.WebviewPanel;
     private readonly _extensionUri: vscode.Uri;
@@ -52,11 +52,11 @@ export class DevAssistantChat {
         }
 
         if (conversationId) {
-            DevAssistantChat.currentPanel.loadConversation(context, conversationId)
+            DevAssistantChat.currentPanel.loadConversation(context, conversationId);
         } else {
             // reset 
-            DevAssistantChat.currentPanel._conversation.id = null
-            DevAssistantChat.currentPanel._conversation.messages = []
+            DevAssistantChat.currentPanel._conversation.id = null;
+            DevAssistantChat.currentPanel._conversation.messages = [];
         }
     }
 
@@ -71,7 +71,7 @@ export class DevAssistantChat {
         }
 
         // Atualiza as mensagens no webview
-        DevAssistantChat.currentPanel.startCheckingConversationStatus()
+        DevAssistantChat.currentPanel.startCheckingConversationStatus();
         DevAssistantChat.currentPanel._updateChat();
     }
 
@@ -83,7 +83,7 @@ export class DevAssistantChat {
                 const runs = await ApiHandler.getInstance(this._context).checkThreadRunsStatus(this._conversation.id);
                 this._runs = runs.data;
 
-                const status = this._runs[0].status
+                const status = this._runs[0].status;
                 
                 // vscode.window.showInformationMessage(`RUN STATUS CHECK ${i++}: ${status}`);
                 this._panel.webview.postMessage({
@@ -91,12 +91,12 @@ export class DevAssistantChat {
                     status: status
                 });
 
-                if (status == 'completed') {
+                if (status === 'completed') {
                     this.loadConversation(this._context, this._conversation.id);
                     this._updateChat();
                 }
 
-                if (status != 'in_progress' && status != 'queued') {
+                if (status !== 'in_progress' && status !== 'queued') {
                     return;
                 }
                 
@@ -104,7 +104,7 @@ export class DevAssistantChat {
 
             // Aguarda 1 segundo antes de verificar novamente
             setTimeout(checkStatus, 1000);
-        }
+        };
 
         // Inicia a verificação do status
         checkStatus();
@@ -135,13 +135,13 @@ export class DevAssistantChat {
         this._renderChat();
 
         this._panel.onDidDispose(() => {
-            this.dispose()
+            this.dispose();
         }, null, this._disposables);
         
         this._panel.onDidChangeViewState(
             e => {
                 if (e.webviewPanel.visible) {
-                    this.startCheckingConversationStatus()
+                    this.startCheckingConversationStatus();
                     this._updateChat(); // Atualiza os dados da conversa no webview
                 }
             },
@@ -161,7 +161,7 @@ export class DevAssistantChat {
                         const userToken = await authHandler.getSecret('devAssistant.user.accessToken');
                         
                         if (!userToken) {
-                            vscode.window.showErrorMessage('To use Dev Assistant you need to set an API KEY')
+                            vscode.window.showErrorMessage('To use Dev Assistant you need to set an API KEY');
                             this._conversation.id = null;
                             this._conversation.messages = [];
                             this._updateChat();
@@ -169,7 +169,7 @@ export class DevAssistantChat {
                         }
 
                         if (!message.conversation_id) {
-                            this._conversation.messages = []
+                            this._conversation.messages = [];
                         }
 
                         this._conversation.messages.push({
@@ -179,20 +179,20 @@ export class DevAssistantChat {
 
                         this._updateChat();
                                                 
-                        const conversation_id = await ApiHandler.getInstance(this._context).sendMessage(message);
+                        const conversationId = await ApiHandler.getInstance(this._context).sendMessage(message);
 
-                        if (conversation_id) {                          
-                            this._conversation.id = conversation_id
-                            this.loadConversation(this._context, conversation_id);
+                        if (conversationId) {                          
+                            this._conversation.id = conversationId;
+                            this.loadConversation(this._context, conversationId);
                         } else {
-                            this._conversation.id = null
-                            this._conversation.messages = []
+                            this._conversation.id = null;
+                            this._conversation.messages = [];
                         }
                         
-                        this.startCheckingConversationStatus()
+                        this.startCheckingConversationStatus();
                         this._updateChat();
 
-                        vscode.commands.executeCommand('dev-assistant-ai.refreshConversations')                        
+                        vscode.commands.executeCommand('dev-assistant-ai.refreshConversations');                        
                         return;
                 }
             },
