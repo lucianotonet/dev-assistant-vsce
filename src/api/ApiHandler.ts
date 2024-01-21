@@ -45,10 +45,11 @@ export class ApiHandler {
         });
     }
 
-    public async get(url: string) {
+    public async get(url: string, params: any = {}) {
         url = this.constructUrl(url);
         return axios.get(url, {
-            headers: await this.constructHeaders()
+            headers: await this.constructHeaders(),
+            params: params
         });
     }
 
@@ -74,10 +75,15 @@ export class ApiHandler {
         }
     }
 
-    public async fetchMessages(conversationId: string) {
+    public async fetchMessages(conversationId: string, parameters: {limit: number|null, after:string|null, before:string|null}) {
         const endpoint = `${API_URL}/chat/${conversationId}`;
+        const params = {
+            limit: parameters.limit,
+            after: parameters.after,
+            before: parameters.before
+        };
         try {
-            const response = await this.get(endpoint);
+            const response = await this.get(endpoint, params);
             return response.data;
         } catch (error) {
             vscode.window.showErrorMessage('Failed to fetch messages');

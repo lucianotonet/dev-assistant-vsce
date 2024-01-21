@@ -145,10 +145,16 @@ textarea::placeholder {
 #chatTitle {
 	padding: 0;
 	margin: 0;
+	text-transform: title;
+	vertical-align: middle;	
+	font-weight: normal;
+	letter-spacing: 0.1em;
 }
 
 #chatStatus {
-	font-size: 8px;
+	font-size: 10px;
+	text-transform: capitalize;
+	transition: all 0.1s linear;
 }
 
 #chatBody {
@@ -160,17 +166,30 @@ textarea::placeholder {
 }
 
 #chatBody li {
-	padding: var(--input-padding-horizontal);
+	padding: var(--container-padding);
+	line-height: 1.4em;
+}
+
+#chatBody li.placeholder {
+	opacity: 0.3;
+	cursor: wait;
 }
 
 #chatBody li.assistant {
-	background-color: rgba(240, 255, 255, 0.007);	
+	/* background-color: var(--vscode-button-border); */
 }
 
-#chatBody li div > strong {	
+#chatBody li.user {
+	background-color: var(--vscode-editor-rangeHighlightBackground);
+	/* background-color: var(--vscode-commandCenter-background); */
+}
+
+#chatBody li div > strong {
 	text-transform: uppercase;
-	vertical-align: text-top;
-	font-size: 10px !important;	
+	vertical-align: middle;
+	font-size: 8px !important;
+	font-weight: normal;
+	letter-spacing: 0.15em;
 }
 
 #chatForm {
@@ -181,13 +200,14 @@ textarea::placeholder {
 	width: 100%;
 	transition: all ease-in-out 0.2s;
 	padding: var(--input-margin-vertical) inherit;
+	box-shadow: black 0px 10px 10px 5px;
 }
 
 #chatForm > .container {
     display: flex;
     flex-direction: column;
-    justify-self: end;
     width: 100%;
     gap: var(--input-margin-vertical);
-	padding-bottom: 30px;
+    padding-bottom: 30px;
+    padding-top: 15px;
 }

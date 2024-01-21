@@ -12,8 +12,7 @@ This project is in its early stages and is still shaping its identity. While we 
 A special thanks to:
 
 - Luciano T. for the initiative and development of the project.
-- ChatGPT for providing an amazing platform for interaction.
-- GitHub Copilot for assisting in development and coding.
+- [Cursor](https://github.com/getcursor/cursor).
 
 ## 💬 Discord Channel
 

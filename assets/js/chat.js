@@ -8,22 +8,20 @@
     const chatBody = document.getElementById('chatBody');
     const chatHeading = document.getElementById('chatHeading');
     const chatTitle = document.getElementById('chatTitle');   
-    const chatStatus = document.getElementById('chatStatus');
-    const form = document.getElementById('chatForm');
     
+    const chatStatusFeedback = document.getElementById('chatStatusFeedback');
+    const chatStatus = document.getElementById('chatStatus');
+    
+    const form = document.getElementById('chatForm');
     const chat = document.getElementById('chat');
     const input = document.getElementById('input');
 
-    console.log('Estado inicial', oldState);
-
-    let currentRunStatus = (oldState && oldState.status) || '';
     let currentMessage = (oldState && oldState.message) || '';
     let current_conversation_id = (oldState && oldState.conversationId) || '';
     let messages = (oldState && oldState.messages) || [];
 
     if (input) input.value = currentMessage;
-    if (chatStatus) chatStatus.innerHTML = currentRunStatus
-
+    
     // Trata as mensagens enviadas da extensão para o webview
     window.addEventListener('message', event => {
         const message = event.data; // Os dados json que a extensão enviou
@@ -38,37 +36,60 @@
                     case 'in_progress':
                         statusMessage = '🟡';
                         chatStatus.classList.add('loading')
+                        chatStatusFeedback.innerHTML = "Working ..."
+                        form.disabled = true;
+                        input.disabled = true
                         break;
                     case 'queud':
                         statusMessage = '🟠';
+                        chatStatusFeedback.innerHTML = "Queued"
+                        form.disabled = false;
+                        input.disabled = false
                         break;
                     case 'completed':
-                        statusMessage = '🟢';
+                        statusMessage = '🟢';                      
+                        chatStatusFeedback.innerHTML = "Ready"                        
+                        form.disabled = false;
+                        input.disabled = false
                         break;
                     case 'failed':
                         statusMessage = '🔴';
+                        chatStatusFeedback.innerHTML = "Error!"
+                        form.disabled = false;
+                        input.disabled = false
                         break;
                     default:
                         statusMessage = '⚪';
+                        chatStatusFeedback.innerHTML = ""
+                        form.disabled = false;
+                        input.disabled = false
                         break;
                 }
 
-                if (chatStatus) {
-                    chatStatus.innerHTML = `${statusMessage}`;                    
+                if (chatStatusLed) {
+                    chatStatusLed.innerHTML = `${statusMessage}`;                    
                 }
 
                 break;
             
             case 'updateChat':
                 current_conversation_id = message.conversation.id;
-                messages = message.conversation.messages;
+                var currentQtd = messages.length
                 
+                messages = message.conversation.messages;
                 if (chatTitle) chatTitle.innerHTML = `Chat #${current_conversation_id}`
                 if (chatBody) chatBody.innerHTML = '';
-
                 
                 messages.forEach(msg => {
                     const li = document.createElement('li');
+                    
+                    if (msg.id) {
+                        li.id = msg.id;
+                        li.classList.remove('placeholder');
+                    } else {
+                        li.classList.add('placeholder');
+                    }
+
                     li.classList.add(msg.role);
 
                     let name = msg.role == "assistant" ? "Dev Assistant" : "You"
@@ -80,13 +101,13 @@
 
                 hljs.highlightAll();
 
-                // Scroll automático para baixo no #chat
-                if (chatUI) {
+                if (chatUI && currentQtd != message.conversation.messages.lenght) {
                     chatUI.scrollTo({
                         top: chatUI.scrollHeight,
                         behavior: 'smooth'
                     });
                 }
+                
                 break;
         }
     });
@@ -97,14 +118,12 @@
         if (input && input.value) {
             
             const message = input.value;
-            
-            if (chatStatus) {
-                chatStatus.innerHTML = '🟡';
-                chatStatus.classList.add('loading')
-            }
+                        
+            chatStatusLed.innerHTML = '🟡';
+            chatStatusFeedback.innerHTML = "Sending ..."
             
             input.value = '';
-            input.disable
+            input.disabled = true
             vscode.postMessage({
                 command: 'newMessage',
                 conversation_id: current_conversation_id ?? null,

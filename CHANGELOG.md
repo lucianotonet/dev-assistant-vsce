@@ -7,3 +7,4 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 ## [Unreleased]
 
 - Initial release
+- Fixed a bug where the conversation ID was being sent in an incorrect format, causing a new conversation to start with each message. This was corrected in the last commit.
