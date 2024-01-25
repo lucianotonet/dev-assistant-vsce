@@ -109,7 +109,7 @@ textarea::placeholder {
 
 .logo {
 	display: flex;
-	margin: 0 auto;
+	margin: auto;
 	align-items: center;
 	justify-self: center;
 	font-family: 'Courier New', Courier, monospace, serif;
@@ -166,8 +166,7 @@ textarea::placeholder {
 }
 
 #chatBody li {
-	padding: var(--container-padding);
-	line-height: 1.4em;
+	line-height: 1.5em;
 }
 
 #chatBody li.placeholder {
@@ -184,12 +183,22 @@ textarea::placeholder {
 	/* background-color: var(--vscode-commandCenter-background); */
 }
 
+.msgHeading {
+	display: flex;
+	justify-content: space-between;	
+}
+
 #chatBody li div > strong {
 	text-transform: uppercase;
 	vertical-align: middle;
-	font-size: 8px !important;
+	font-size: 7px !important;
 	font-weight: normal;
 	letter-spacing: 0.15em;
+}
+
+#chatBody li div > .msgTokensUsage {
+	display: flex;
+	gap: 4px;
 }
 
 #chatForm {
@@ -210,4 +219,21 @@ textarea::placeholder {
     gap: var(--input-margin-vertical);
     padding-bottom: 30px;
     padding-top: 15px;
+}
+
+#chatBody li .delete-message {
+	visibility: hidden;
+}
+
+#chatBody li:hover .delete-message {
+	visibility: visible;
+}
+
+.delete-message {
+    cursor: pointer;
+    color: var(--vscode-input-placeholderForeground);
+}
+
+.delete-message:hover, .delete-message:active {
+    color: var(--vscode-input-foreground);
 }

@@ -60,6 +60,13 @@ export class ApiHandler {
         });
     }
 
+    public async delete(url: string) {
+        url = this.constructUrl(url)
+        return axios.delete(url, {
+            headers: await this.constructHeaders()
+        })
+    }
+
     private constructUrl(url: string): string {
         return url.startsWith('http') ? url : `${API_URL}${url}`; // If url doesn't start with http or https, concatenate with API_URL
     }
@@ -91,7 +98,7 @@ export class ApiHandler {
         }
     }
 
-    public async sendMessage(message: {conversationId: string|null, content:string, role:string}): Promise<void|null> {
+    public async sendMessage(message: {clientId: string|undefined, conversationId: string|null, content:string, role:string}): Promise<void|null> {
         let endpoint = `${API_URL}/chat/`;
         if (message.conversationId) {
             endpoint += message.conversationId;
@@ -99,14 +106,36 @@ export class ApiHandler {
         try {
             let response;
             if (message.conversationId) {
-                response = await this.put(endpoint, { content: message.content, role: message.role });
+                response = await this.put(endpoint, message);
             } else {
-                response = await this.post(endpoint, { content: message.content, role: message.role });
+                response = await this.post(endpoint, message);
             }
             return response.data;
             // Handle the API response here, for example, updating the chat view
         } catch (error) {
             vscode.window.showErrorMessage(`Error sending message: ${error}`);
+            return null;
+        }
+    }
+
+    public async deleteMessage(conversationId: string, messageId: string) {
+        let endpoint = `${API_URL}/chat/${conversationId}/${messageId}`;
+        try {
+            const response = await this.delete(endpoint);
+            return response.data;
+        } catch (error) {
+            vscode.window.showErrorMessage(`Error deleting message: ${error}`);
+            return null;
+        }
+    }
+
+    public async deleteConversation(conversationId: string) {
+        let endpoint = `${API_URL}/chat/${conversationId}`;
+        try {
+            const response = await this.delete(endpoint);
+            return response.data;
+        } catch (error) {
+            vscode.window.showErrorMessage(`Error deleting conversation: ${error}`);
             return null;
         }
     }

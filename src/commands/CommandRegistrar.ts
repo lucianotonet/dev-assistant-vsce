@@ -4,28 +4,20 @@ import { AIInlineCompletionItemProvider } from '../completion/AIInlineCompletion
 import { AblyHandler } from '../api/AblyHandler';
 import { ConversationsDataProvider } from '../chat/ConversationsDataProvider';
 import { DevAssistantChat } from '../chat/DevAssistantChat';
-import { getWebviewOptions } from '../utils/Utilities';
-import { ApiHandler } from '../api/ApiHandler';
 
 export class CommandRegistrar {
     public static registerAllCommands(context: vscode.ExtensionContext) {
         context.subscriptions.push(
             vscode.commands.registerCommand('dev-assistant-ai.auth', async () => {
-                try {
-                    await AuthHandler.getInstance(context).askForToken(context);
-                } catch (error) {
-                    console.error("Failed to handle auth command", error);
-                    vscode.window.showErrorMessage(`Failed to handle auth command: ${error}`);
-                    return;
-                }
-                await AblyHandler.getInstance().init(context);
+                await AuthHandler.getInstance(context).init()
+                await AblyHandler.getInstance(context).init();
             }),
             vscode.commands.registerCommand('dev-assistant-ai.callback', async (uri: vscode.Uri) => {
                 vscode.window.showInformationMessage('Callback...');
             }),
             vscode.commands.registerCommand('dev-assistant-ai.deauth', async () => {
                 vscode.window.showInformationMessage('Desautenticando...');
-                await AuthHandler.getInstance(context).handleDeauthCommand(context);
+                await AuthHandler.getInstance(context).handleDeauthCommand();
             }),
             vscode.commands.registerCommand('dev-assistant-ai.triggerGhostCompletion', async () => {
                 const editor = vscode.window.activeTextEditor;
@@ -61,8 +53,8 @@ export class CommandRegistrar {
                 await DevAssistantChat.createOrShow(context, conversationId);                
             }),
             vscode.commands.registerCommand('dev-assistant-ai.doAction', () => {
-                if (DevAssistantChat.currentPanel) {
-                    DevAssistantChat.currentPanel.doAction();
+                if (DevAssistantChat.instance) {
+                    DevAssistantChat.instance.doAction();
                 }
             }),
             vscode.commands.registerCommand('dev-assistant-ai.refreshConversations', () => {

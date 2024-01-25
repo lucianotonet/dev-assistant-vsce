@@ -1,10 +1,9 @@
 import * as vscode from 'vscode';
-import { capture } from './utils/Utilities';
+import { capture, getWebviewOptions } from './utils/Utilities';
 import { AuthHandler } from './auth/AuthHandler';
 import { CommandRegistrar } from './commands/CommandRegistrar';
-import { ConversationsDataProvider } from './chat/ConversationsDataProvider';
 
-export async function activate(context: vscode.ExtensionContext) {    
+export async function activate(context: vscode.ExtensionContext) {
     if (!context.globalState.get("hasBeenInstalled")) {
         context.globalState.update("hasBeenInstalled", true);
         capture({
@@ -19,8 +18,7 @@ export async function activate(context: vscode.ExtensionContext) {
     }
 
     CommandRegistrar.registerAllCommands(context);
-        
+
     await vscode.commands.executeCommand('dev-assistant-ai.auth');
     await vscode.commands.executeCommand('dev-assistant-ai.openChat');    
 }
-

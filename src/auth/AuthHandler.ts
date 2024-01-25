@@ -4,24 +4,34 @@ import { ApiHandler } from '../api/ApiHandler';
 import axios from 'axios';
 
 export class AuthHandler {
+    private static instance: AuthHandler;
     private apiHandler;
     private clientId: string | undefined; // Adicionado para armazenar o clientId
     private context: vscode.ExtensionContext;
 
-    private constructor(context: vscode.ExtensionContext) {
+    private constructor(context: vscode.ExtensionContext) {        
         this.apiHandler = ApiHandler.getInstance(context);
         this.context = context;
     }
 
     public static getInstance(context: vscode.ExtensionContext): AuthHandler {
-        return new AuthHandler(context);
+        return AuthHandler.instance ?? new AuthHandler(context)
     }
 
-    public getClientId(): string | undefined {
-        return this.clientId;
+    public async getClientId(): Promise<string | undefined> {
+        return await this.getSecret('devAssistant.client.id');
     }
 
-    public async handleDeauthCommand(context: vscode.ExtensionContext): Promise<void> {
+    public async init(): Promise<void> {
+        try {
+            await AuthHandler.getInstance(this.context).askForToken();
+        } catch (error) {
+            console.error("Failed to handle auth command", error);
+            vscode.window.showErrorMessage(`Failed to handle auth command: ${error}`);
+        }
+    }
+    
+    public async handleDeauthCommand(): Promise<void> {
         await this.deleteSecret('devAssistant.user.accessToken');
         await this.deleteSecret('devAssistant.user.refreshToken');
         await this.deleteSecret('devAssistant.client.accessToken');
@@ -30,11 +40,11 @@ export class AuthHandler {
         vscode.window.showInformationMessage('A extensão foi desconectada do servidor!');
     }
 
-    public async askForToken(context: vscode.ExtensionContext): Promise<void> {
+    public async askForToken(): Promise<void> {
         let userToken = await this.getSecret('devAssistant.user.accessToken');
 
         if (userToken) {
-            await this.authenticateClient(context);
+            await this.authenticateClient();
             return;
         }
 
@@ -59,7 +69,7 @@ export class AuthHandler {
 
         if (newUserToken) {
             await this.storeSecret('devAssistant.user.accessToken', newUserToken);
-            await this.authenticateClient(context);
+            await this.authenticateClient();
         }
         else {
             vscode.window.showErrorMessage('Token inválido!');
@@ -67,7 +77,7 @@ export class AuthHandler {
 
     }
 
-    private async authenticateClient(context: vscode.ExtensionContext): Promise<void> {
+    private async authenticateClient(): Promise<void> {
         let clientAuthResponse: any;        
         try {
             const userToken = await this.getSecret('devAssistant.user.accessToken');
@@ -90,12 +100,12 @@ export class AuthHandler {
         await this.storeSecret('devAssistant.client.accessToken', clientAuthResponse.data.accessToken);
         await this.storeSecret('devAssistant.client.refreshToken', clientAuthResponse.data.refreshToken);
 
-        vscode.window.showInformationMessage(`Extenção autenticada com sucesso!`);
+        // vscode.window.showInformationMessage(`Extenção autenticada com sucesso!`);
 
-        this.fetchUser(context);
+        this.fetchUser();
     }
 
-    private async fetchUser(context: vscode.ExtensionContext): Promise<void> {
+    private async fetchUser(): Promise<void> {
         let userAuthResponse: any;
         try {
             userAuthResponse = await this.apiHandler.get(`${DEV_ASSISTANT_SERVER}/api/user`);
@@ -104,11 +114,12 @@ export class AuthHandler {
             return;
         }
 
-        await context.secrets.store('devAssistant.user.name', userAuthResponse.data.name);
-        await context.secrets.store('devAssistant.user.email', userAuthResponse.data.email);
-        await context.secrets.store('devAssistant.user.id', userAuthResponse.data.id.toString());
-
         vscode.window.showInformationMessage(`Bem-vindo ao Dev Assistant, ${userAuthResponse.data.name}!`);
+        
+        await this.context.secrets.store('devAssistant.user.name', userAuthResponse.data.name);
+        await this.context.secrets.store('devAssistant.user.email', userAuthResponse.data.email);
+        await this.context.secrets.store('devAssistant.user.id', userAuthResponse.data.id.toString());
+
     }
 
     private async delay(ms: number): Promise<void> {

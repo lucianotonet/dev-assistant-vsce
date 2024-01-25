@@ -70,9 +70,25 @@
         "command": "dev-assistant-ai.doAction",
         "title": "Excute an action",
         "category": "Dev Assistant"
+      },
+      {
+        "command": "dev-assistant-ai.openInlineInput",
+        "title": "Open Inline Input",
+        "category": "Dev Assistant"
+      },
+      {
+        "command": "dev-assistant-ai.deleteConversation",
+        "title": "Delete Conversation",
+        "category": "Dev Assistant"
       }
     ],
     "keybindings": [
+      {
+        "command": "dev-assistant-ai.openInlineInput",
+        "key": "ctrl+alt+space",
+        "mac": "cmd+alt+space",
+        "when": "editorTextFocus"
+      },
       {
         "command": "dev-assistant-ai.triggerInlineCompletion",
         "key": "ctrl+alt+enter",

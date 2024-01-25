@@ -6,6 +6,7 @@ import { DEV_ASSISTANT_SERVER, API_URL } from '../utils/Utilities';
 import fetch from 'node-fetch';
 import { InstructionHandler } from '../io/InstructionHandler';
 import { AuthHandler } from '../auth/AuthHandler';
+import { DevAssistantChat } from '../chat/DevAssistantChat';
 
 
 interface TokenResponse {
@@ -16,32 +17,37 @@ interface TokenResponse {
 export class AblyHandler {
     private static instance: AblyHandler;
     private ablyRealtime: any;
+    private apiHandler: any;
+    private authHandler: any;
     private ablyChannel: any;
+    private context: vscode.ExtensionContext;
+    private typingIndicator: vscode.StatusBarItem;
 
-    public static getInstance(): AblyHandler {
-        if (!AblyHandler.instance) {
-            AblyHandler.instance = new AblyHandler();
-        }
-        return AblyHandler.instance;
+    private constructor(context: vscode.ExtensionContext) {
+        this.apiHandler = ApiHandler.getInstance(context);
+        this.authHandler = AuthHandler.getInstance(context);
+        this.context = context;
+        this.typingIndicator = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left);
     }
 
-    public async getTokenRequest(context: vscode.ExtensionContext): Promise<any> {
-        const apiHandler = ApiHandler.getInstance(context);
-        const authHandler = AuthHandler.getInstance(context);
-        
-        const token = await authHandler.getSecret('devAssistant.client.accessToken');
-        const clientId = await authHandler.getSecret('devAssistant.client.id');
+    public static getInstance(context: vscode.ExtensionContext): AblyHandler {
+        return AblyHandler.instance ?? new AblyHandler(context);
+    }
+
+    public async getTokenRequest(): Promise<any> {
+        const token = await this.authHandler.getSecret('devAssistant.client.accessToken');
+        const clientId = await this.authHandler.getSecret('devAssistant.client.id');
 
         if (!token || !clientId) {
-            throw new Error('Token or clientId is undefined');
+            throw new Error('Ably error: Token or clientId is undefined');
         }
 
-        const response = await apiHandler.get(`${DEV_ASSISTANT_SERVER}/auth/clients/${clientId}/ably`);
+        const response = await this.apiHandler.get(`${DEV_ASSISTANT_SERVER}/auth/clients/${clientId}/ably`);
         return response.data;
     }
 
-    public async init(context: vscode.ExtensionContext): Promise<void> {
-        const tokenRequest = await this.getTokenRequest(context);
+    public async init(): Promise<void> {
+        const tokenRequest = await this.getTokenRequest();
         if (tokenRequest) {
             // Check if keyName is in token_request
             if (!tokenRequest.keyName) {
@@ -74,29 +80,54 @@ export class AblyHandler {
             vscode.window.showErrorMessage('Failed to get token request.');
             return;
         }
-        const authHandler = AuthHandler.getInstance(context);
-        const clientId = await authHandler.getSecret('devAssistant.client.id');
+        const clientId = await this.authHandler.getSecret('devAssistant.client.id');
         if (this.ablyRealtime) {
             this.ablyChannel = this.ablyRealtime.channels.get(`private:dev-assistant-${clientId}`);
             if (!this.ablyChannel) {
                 vscode.window.showErrorMessage('Failed to initialize private channel.');
                 return;
             }
-            this.ablyChannel.subscribe(this.handleAblyMessage.bind(this, context));
-            vscode.window.showInformationMessage('Dev Assistant is ready!');
+            this.ablyChannel.subscribe(this.handleAblyMessage.bind(this, this.context));
+            // this.ablyChannel.subscribe(this.handleTypingIndicator.bind(this));
+            
+            // vscode.window.showInformationMessage('Dev Assistant is ready!');
+            
         } else {
             vscode.window.showErrorMessage('Ably Realtime is not initialized.');
         }
     }
 
-    private handleAblyMessage(context: vscode.ExtensionContext, message: any): void {
+    private async handleAblyMessage(context: vscode.ExtensionContext, message: any): Promise<void> {
         // Verifica se message.data e message.data.feedback existem antes de tentar acessá-los
-        if (message.data && message.data.feedback) {
-            vscode.window.showInformationMessage('Dev Assistant: \n' + message.data.feedback);
-        }
+        // if (message.data && message.data.feedback) {
+        //     vscode.window.showInformationMessage('Dev Assistant: \n' + message.data.feedback);
+        // }        
+
+        this.handleTypingIndicator(message)
+
         const commandOrchestrator = InstructionHandler.getInstance(context);
-        const instruction = message.data;
-        commandOrchestrator.executeCommand(context, instruction);
+        // Envie para o chat
+        if (message.data.content || message.data.chunk) {
+            this.typingIndicator.hide(); // Hide typing indicator when a message is received
+            await DevAssistantChat.instance.processMessage(message.data);
+            return;
+        }
+
+        // or
+
+        // execute a command
+        if (message.data.module && message.data.operation) {
+            const instruction = message.data;
+            commandOrchestrator.executeCommand(context, instruction);
+        }
+    }
+
+    private handleTypingIndicator(message: any): void {
+        if (message.data.typing) {
+            DevAssistantChat.instance.handleTypingIndicator(true);
+        } else {
+            DevAssistantChat.instance.handleTypingIndicator(false);
+        }
     }
 
     public async sendInstruction(instruction: string): Promise<void> {
@@ -119,34 +150,6 @@ export class AblyHandler {
         } catch (error) {
             console.error('Failed to get Ably token request:', error);
             throw error;
-        }
-    }
-
-    // 2. Connect to Ably
-    private async connectToAbly(context: vscode.ExtensionContext, token: string) {
-        const ably = new Ably.Realtime({ token });
-        const clientId = AuthHandler.getInstance(context).getClientId();
-        const channelName = `private:dev-assistant-${clientId}`;
-        const channel = ably.channels.get(channelName);
-
-        channel.subscribe((message) => {
-            this.handleMessage(message);
-        });
-    }
-
-    // 3. Handle Messages
-    private handleMessage(message: any) {
-        console.log('Received message:', message);
-        // TODO: Add logic to handle the message and display it on the timeline
-    }
-
-    // Example of use
-    private async initializeAbly(context: vscode.ExtensionContext) {
-        try {
-            const tokenRequest = await this.getAblyTokenRequest(context);
-            this.connectToAbly(context, tokenRequest);
-        } catch (error) {
-            console.error('Failed to initialize Ably:', error);
         }
     }
 }

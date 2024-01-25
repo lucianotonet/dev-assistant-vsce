@@ -6,6 +6,7 @@ import { ICommand } from '../commands/ICommand';
 import { EditorCommand } from '../commands/editorCommand';
 import { DiffCommand } from '../commands/diffCommand';
 import { GitCommand } from '../commands/gitCommand';
+import { DevAssistantChat } from '../chat/DevAssistantChat';
 
 export class InstructionHandler {
     private static instance: InstructionHandler;
