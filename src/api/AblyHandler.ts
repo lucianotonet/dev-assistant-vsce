@@ -109,7 +109,7 @@ export class AblyHandler {
         // Envie para o chat
         if (message.data.content || message.data.chunk) {
             this.typingIndicator.hide(); // Hide typing indicator when a message is received
-            await DevAssistantChat.instance.processMessage(message.data);
+            await DevAssistantChat.instance?.processMessage(message.data);
             return;
         }
 
@@ -124,9 +124,9 @@ export class AblyHandler {
 
     private handleTypingIndicator(message: any): void {
         if (message.data.typing) {
-            DevAssistantChat.instance.handleTypingIndicator(true);
+            DevAssistantChat.instance?.handleTypingIndicator(true);
         } else {
-            DevAssistantChat.instance.handleTypingIndicator(false);
+            DevAssistantChat.instance?.handleTypingIndicator(false);
         }
     }
 

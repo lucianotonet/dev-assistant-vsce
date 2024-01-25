@@ -49,8 +49,8 @@ export class CommandRegistrar {
         vscode.window.registerTreeDataProvider('dev-assistant-ai.conversations', conversationsDataProvider);
 
         context.subscriptions.push(
-            vscode.commands.registerCommand('dev-assistant-ai.openChat', async (conversationId: string) => {                
-                await DevAssistantChat.createOrShow(context, conversationId);                
+            vscode.commands.registerCommand('dev-assistant-ai.openChat', (conversationId: string) => {                
+                DevAssistantChat.createOrShow(context, conversationId);                
             }),
             vscode.commands.registerCommand('dev-assistant-ai.doAction', () => {
                 if (DevAssistantChat.instance) {

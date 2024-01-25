@@ -5,9 +5,9 @@ import { AuthHandler } from '../auth/AuthHandler';
 import { marked } from 'marked'; // Import the marked library for Markdown parsing
 
 export class DevAssistantChat {
-    public static instance: DevAssistantChat;
+    public static instance: DevAssistantChat | undefined;
     public static readonly viewType = 'devAssistantChat';
-    private readonly _panel: vscode.WebviewPanel;
+    private _panel: vscode.WebviewPanel | undefined;
     private readonly _extensionUri: vscode.Uri;
     private _disposables: vscode.Disposable[] = [];
     private readonly _context: vscode.ExtensionContext;
@@ -22,32 +22,14 @@ export class DevAssistantChat {
             html: string | null
         }[]
     } = { id: null, title: 'New chat', messages: [] };
-    private _intervalId: any;
-    private _runs: {
-        id: string,
-        object: string,
-        createdAt: number,
-        threadId: string,
-        status: string,
-        requiredAction: any,
-        lastError: any,
-        expiresAt: any,
-        startedAt: number,
-        cancelledAt: any,
-        failedAt: any,
-        completedAt: number,
-        model: string,
-        instructions: string,
-        tools: any[],
-        fileIds: any[],
-        metadata: any[]
-    }[] = [];
+    private _intervalId: NodeJS.Timeout | undefined;
+    private _runs: any[] = [];
     private _apiType: 'assistant' | 'chat' = 'chat'; // Define a API de chat como padrão
 
     public static async createOrShow(context: vscode.ExtensionContext, conversationId: string | null) {
         const column = vscode.window.activeTextEditor ? vscode.ViewColumn.Beside : undefined;
         // If the current panel does not exist, create a new one
-        if (!DevAssistantChat.instance) {
+        if (!DevAssistantChat.instance || DevAssistantChat.instance._panel === undefined) {
             const panel = vscode.window.createWebviewPanel(
                 DevAssistantChat.viewType,
                 'Dev Assistant',
@@ -58,7 +40,7 @@ export class DevAssistantChat {
             DevAssistantChat.instance = new DevAssistantChat(context, panel);
         } else {
             // If the current panel exists, reveal it in the same column as before
-            DevAssistantChat.instance._panel.reveal(DevAssistantChat.instance._panel.viewColumn);
+            DevAssistantChat.instance._panel?.reveal(column || DevAssistantChat.instance._panel.viewColumn);
         }
 
         if (conversationId) {
@@ -66,29 +48,66 @@ export class DevAssistantChat {
         } else {
             // reset 
             DevAssistantChat.instance._conversation.id = null;
-            DevAssistantChat.instance._conversation.title = ''
+            DevAssistantChat.instance._conversation.title = 'New chat';
             DevAssistantChat.instance._conversation.messages = [];
         }
     }
 
     public static revive(panel: vscode.WebviewPanel, context: vscode.ExtensionContext, conversationId: string | null) {
-        // Restaura o estado salvo, se houver
+        // Restore the saved state, if any
         const savedConversation = conversationId ? { id: conversationId, title: '', messages: [] } : context.workspaceState.get<{ id: string, title: string, messages: { id: string, content: any, role: string, html: any | null }[] }>('conversation');
 
-        DevAssistantChat.instance = new DevAssistantChat(context, panel);
+        if (!DevAssistantChat.instance || DevAssistantChat.instance._panel === undefined) {
+            DevAssistantChat.instance = new DevAssistantChat(context, panel);
+        } else {
+            DevAssistantChat.instance._panel = panel;
+            if (DevAssistantChat.instance._panel) {
+                DevAssistantChat.instance._panel.reveal(vscode.ViewColumn.One);
+            }
 
-        if (savedConversation) {
-            DevAssistantChat.instance._conversation = savedConversation;
-            DevAssistantChat.instance.loadConversation(context, savedConversation.id);
+            if (savedConversation) {
+                DevAssistantChat.instance._conversation = savedConversation;
+                DevAssistantChat.instance.loadConversation(context, savedConversation.id);
+            }
         }
 
-        // Atualiza as mensagens no webview
+        // Update the messages in the webview
         if (DevAssistantChat.instance._apiType === 'assistant') {
             DevAssistantChat.instance.startCheckingConversationStatus();
         }
         DevAssistantChat.instance._updateChat();
     }
 
+    public dispose() {
+        // Save the current state of the chat
+        this._context.workspaceState.update('conversation.id', this._conversation.id);
+        this._context.workspaceState.update('conversation.title', this._conversation.title);
+        this._context.workspaceState.update('conversation.messages', this._conversation.messages);
+
+        // If the panel exists, hide it instead of disposing of it
+        if (this._panel) {
+            this._panel.dispose();
+        }
+        this._panel = undefined; // Add this line to dispose of the panel reference
+        DevAssistantChat.instance = undefined; // Add this line to dispose of the instance reference
+
+        // Clear the setInterval
+        if (this._intervalId) {
+            clearInterval(this._intervalId);
+        }
+
+        // Dispose of all disposables
+        this._disposables.forEach(disposable => disposable.dispose());
+        this._disposables = [];
+    }
+
+    private _renderChat() {
+        const webview = this._panel?.webview;
+        if (webview) {
+            webview.html = this._getHtmlForWebview(webview);
+        }
+    }
+    
     public startCheckingConversationStatus() {
         if (this._apiType !== 'assistant') {
             return;
@@ -108,7 +127,7 @@ export class DevAssistantChat {
                 }
 
                 // vscode.window.showInformationMessage(`RUN STATUS CHECK ${i++}: ${status}`);
-                this._panel.webview.postMessage({
+                this._panel?.webview.postMessage({
                     command: 'updateStatus',
                     status: status
                 });
@@ -127,7 +146,7 @@ export class DevAssistantChat {
     }
 
     public handleTypingIndicator(typing: boolean) {
-        this._panel.webview.postMessage({
+        this._panel?.webview.postMessage({
             command: 'updateStatus',
             status: typing ? 'typing' : 'completed'
         });
@@ -187,13 +206,13 @@ export class DevAssistantChat {
                                 'Do you want to delete this message?',
                                 'Yes', 'No');
                             var response
-                            if (userConfirmation === 'Yes') {
+                            if (userConfirmation === 'Yes' && this._conversation.id) {
 
-                                this._panel.webview.postMessage({ command: 'updateStatus', status: 'in_progress' });
+                                this._panel?.webview.postMessage({ command: 'updateStatus', status: 'in_progress' });
 
-                                response = await ApiHandler.getInstance(this._context).deleteMessage(this._conversation.id, message.messageId)
+                                const response = await ApiHandler.getInstance(this._context).deleteMessage(this._conversation.id, message.messageId);
 
-                                if (response.success) {
+                                if (response && response.success) {
                                     this._conversation.messages = this._conversation.messages.filter(msg => msg.id !== message.messageId);
                                     this._updateChat();
                                     this.loadConversation(this._context, this._conversation.id)
@@ -239,8 +258,8 @@ export class DevAssistantChat {
                             this._conversation.messages.pop();
                             this._updateChat();
 
-                            this._panel.webview.postMessage({ command: 'inputValue', value: message.content });
-                            this._panel.webview.postMessage({ command: 'updateStatus', status: 'completed' });
+                            this._panel?.webview.postMessage({ command: 'inputValue', value: message.content });
+                            this._panel?.webview.postMessage({ command: 'updateStatus', status: 'completed' });
                             vscode.window.showErrorMessage('Failed to send message. Please try again later.');
                             return;
                         }
@@ -270,7 +289,7 @@ export class DevAssistantChat {
 
     public doAction() {
         // Send a message to the webview webview.
-        this._panel.webview.postMessage({ command: 'refactor' });
+        this._panel?.webview.postMessage({ command: 'refactor' });
     }
 
     // Will load just the new messages if any
@@ -282,7 +301,7 @@ export class DevAssistantChat {
         }
 
         this._conversation.id = conversationId;
-        this._panel.webview.postMessage({
+        this._panel?.webview.postMessage({
             command: 'updateStatus',
             status: 'in_progress',
         });
@@ -304,7 +323,7 @@ export class DevAssistantChat {
             // Add only new messages to the conversation
             let newMessages = conversation.messages
 
-            newMessages.forEach((message: any) => {
+            newMessages?.forEach((message: any) => {
                 if (!this._conversation.messages.find(m => m.id === message.id)) {
                     this._conversation.messages.push({
                         ...message,
@@ -314,13 +333,13 @@ export class DevAssistantChat {
                 }
             });
 
-            this._panel.webview.postMessage({
+            this._panel?.webview.postMessage({
                 command: 'updateStatus',
                 status: 'completed'
             });
             this._updateChat();
         } catch (error) {
-            this._panel.webview.postMessage({
+            this._panel?.webview.postMessage({
                 command: 'updateStatus',
                 status: 'failed'
             });
@@ -375,37 +394,10 @@ export class DevAssistantChat {
         this._updateChat();
     }
 
-    public dispose() {
-        // Save the current state of the chat
-        this._context.workspaceState.update('conversation.id', this._conversation.id);
-        this._context.workspaceState.update('conversation.title', this._conversation.title);
-        this._context.workspaceState.update('conversation.messages', this._conversation.messages);
 
-        // Clean up our resources
-        this._panel.dispose();
-
-        // Clear the setInterval
-        clearInterval(this._intervalId);
-
-        while (this._disposables.length) {
-            const x = this._disposables.pop();
-            if (x) {
-                x.dispose();
-            }
-        }
-    }
-
-    private _renderChat() {
-        const webview = this._panel.webview;
-        this._panel.webview.html = this._getHtmlForWebview(webview);
-    }
 
     private _updateChat() {
-        if (!this._panel.webview) {
-            return;
-        }
-
-        if (!!this._conversation.id) {
+        if (this._panel?.webview) {
             this._panel.webview.postMessage({
                 command: 'updateChat',
                 conversation: {

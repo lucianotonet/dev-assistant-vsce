@@ -89,9 +89,7 @@ export class AuthHandler {
                 }
             });
         } catch (error: any) {
-            await this.deleteSecret('devAssistant.user.accessToken');
-            await this.deleteSecret('devAssistant.client.accessToken');
-            vscode.window.showErrorMessage(`Erro ao autenticar a extensão: ${error}`);
+            await this.handleDeauthCommand();
             return;
         }
 
@@ -99,8 +97,6 @@ export class AuthHandler {
         await this.storeSecret('devAssistant.client.id', clientAuthResponse.data.clientId);
         await this.storeSecret('devAssistant.client.accessToken', clientAuthResponse.data.accessToken);
         await this.storeSecret('devAssistant.client.refreshToken', clientAuthResponse.data.refreshToken);
-
-        // vscode.window.showInformationMessage(`Extenção autenticada com sucesso!`);
 
         this.fetchUser();
     }
