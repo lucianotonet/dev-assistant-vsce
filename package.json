@@ -2,9 +2,9 @@
   "name": "dev-assistant-ai",
   "displayName": "Dev Assistant AI",
   "description": "Just another AI dev tool",
-  "version": "0.0.10",
+  "version": "0.0.11",
   "icon": "assets/img/icon_nobg.png",
-  "publisher": "lucianotonet",  
+  "publisher": "lucianotonet",
   "license": "MIT",
   "engines": {
     "vscode": "^1.85.1",
