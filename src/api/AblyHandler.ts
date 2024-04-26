@@ -80,46 +80,60 @@ export class AblyHandler {
             vscode.window.showErrorMessage('Failed to get token request.');
             return;
         }
+
         const clientId = await this.authHandler.getSecret('devAssistant.client.id');
+
         if (this.ablyRealtime) {
-            this.ablyChannel = this.ablyRealtime.channels.get(`private:dev-assistant-${clientId}`);
+            this.ablyChannel = this.ablyRealtime.channels.get(`private:devassistant.clients.${clientId}`);
             if (!this.ablyChannel) {
                 vscode.window.showErrorMessage('Failed to initialize private channel.');
                 return;
             }
+
             this.ablyChannel.subscribe(this.handleAblyMessage.bind(this, this.context));
-            // this.ablyChannel.subscribe(this.handleTypingIndicator.bind(this));
-            
+
+            // this.ablyChannel.subscribe(this.handleTypingIndicator.bind(this));            
             // vscode.window.showInformationMessage('Dev Assistant is ready!');
-            
+
         } else {
             vscode.window.showErrorMessage('Ably Realtime is not initialized.');
         }
     }
 
-    private async handleAblyMessage(context: vscode.ExtensionContext, message: any): Promise<void> {
-        // Verifica se message.data e message.data.feedback existem antes de tentar acessá-los
-        // if (message.data && message.data.feedback) {
-        //     vscode.window.showInformationMessage('Dev Assistant: \n' + message.data.feedback);
-        // }        
+    private async handleAblyMessage(context: vscode.ExtensionContext, message: { name: any; data: any }): Promise<void> {
+        switch (message.name) {
+            case 'instruction.created':
+                if (message.data && message.data.feedback) {
+                    vscode.window.showInformationMessage('Dev Assistant: \n' + message.data.feedback);
+                }
+                this.handleTypingIndicator(message);
+                const commandOrchestrator = InstructionHandler.getInstance(context);
+                // execute a command
+                if (message.data.module && message.data.operation) {
+                    const instruction = message.data;
+                    commandOrchestrator.executeCommand(context, instruction);
+                    return;
+                }
 
-        this.handleTypingIndicator(message)
+                // Send to chat
+                this.typingIndicator.hide(); // Hide typing indicator when a message is received
 
-        const commandOrchestrator = InstructionHandler.getInstance(context);
-        // Envie para o chat
-        if (message.data.content || message.data.chunk) {
-            this.typingIndicator.hide(); // Hide typing indicator when a message is received
-            await DevAssistantChat.instance?.processMessage(message.data);
-            return;
+                await DevAssistantChat.instance?.processMessage(message.data);
+
+                break;
+            case 'instruction.updated':
+                this.typingIndicator.hide(); // Hide typing indicator when a message is received
+                return
+                break;
+            case 'instruction.deleted':
+                this.typingIndicator.hide(); // Hide typing indicator when a message is received
+                return
+                break;
+            default:
+                this.typingIndicator.hide(); // Hide typing indicator when a message is received
+                break;
         }
 
-        // or
-
-        // execute a command
-        if (message.data.module && message.data.operation) {
-            const instruction = message.data;
-            commandOrchestrator.executeCommand(context, instruction);
-        }
     }
 
     private handleTypingIndicator(message: any): void {
@@ -137,7 +151,7 @@ export class AblyHandler {
             vscode.window.showErrorMessage('Ably channel is not initialized.');
         }
     }
-   
+
     // 1. Get the TOKEN REQUEST
     private async getAblyTokenRequest(context: vscode.ExtensionContext): Promise<string> {
         const authHandler = AuthHandler.getInstance(context);

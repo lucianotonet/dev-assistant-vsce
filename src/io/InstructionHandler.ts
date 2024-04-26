@@ -7,6 +7,7 @@ import { EditorCommand } from '../commands/editorCommand';
 import { DiffCommand } from '../commands/diffCommand';
 import { GitCommand } from '../commands/gitCommand';
 import { DevAssistantChat } from '../chat/DevAssistantChat';
+import { VSCodeCommand } from '../commands/VSCodeCommand';
 
 export class InstructionHandler {
     private static instance: InstructionHandler;
@@ -32,7 +33,7 @@ export class InstructionHandler {
         const args: any[] = instruction.arguments;
         
         // Inform the server about the received instruction
-        vscode.window.showInformationMessage(`Setting status to processing for instruction ${instructionId}`);
+        // vscode.window.showInformationMessage(`Setting status to processing for instruction ${instructionId}`);
         await this.apiHandler.put(`${DEV_ASSISTANT_SERVER}/api/io/${instructionId}`, { status: 'processing' });
         vscode.commands.executeCommand('workbench.action.files.save');
 
@@ -41,20 +42,25 @@ export class InstructionHandler {
         try {
             const command = this.parseCommand(instruction);
             response = await command.execute();
-
-            // Inform the server about the completed instruction
-            await this.apiHandler.put(`${DEV_ASSISTANT_SERVER}/api/io/${instructionId}`, { status: 'completed', response: JSON.stringify(response) });
-            vscode.window.showInformationMessage(`Instruction completed`);
-        } catch (error) {
+        } catch (error: any) {
             // Inform the server about the failed instruction
-            await this.apiHandler.put(`${DEV_ASSISTANT_SERVER}/api/io/${instructionId}`, { status: 'failed', response: error });
+            await this.apiHandler.put(`${DEV_ASSISTANT_SERVER}/api/io/${instructionId}`, { status: 'failed', response: {error: `${error}`} });            
             vscode.window.showErrorMessage(`Instruction failed with error: ${error}`);
+            return;
         }
+
+        // Inform the server about the instruction RESULT
+        await this.apiHandler.put(`${DEV_ASSISTANT_SERVER}/api/io/${instructionId}`, { status: 'completed', response: response });
+        vscode.window.showInformationMessage(`Instruction completed`);
     }
 
     private parseCommand(instruction: any): ICommand {
         const { module, operation, arguments: args } = instruction;
         switch (module) {
+            case 'vsce':
+                return new VSCodeCommand(operation, args);
+            case 'vscode':
+                return new VSCodeCommand(operation, args);
             case 'editor':
                 return new EditorCommand(operation, args);
             case 'diff':
@@ -63,6 +69,6 @@ export class InstructionHandler {
                 return new GitCommand(operation, args);            
             default:
                 throw new Error(`Unrecognized module: ${module}`);
-        }
+        }        
     }
 }

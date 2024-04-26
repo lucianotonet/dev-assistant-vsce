@@ -9,6 +9,7 @@ export class EditorCommand implements ICommand {
         this.operations = new Map<string, (...args: any[]) => Promise<any>>([
             ['insertText', this.insertText],
             ['deleteText', this.deleteText],
+            ['openFile', this.openFile],
             // outros mapeamentos
         ]);
     }

@@ -20,5 +20,5 @@ export async function activate(context: vscode.ExtensionContext) {
     CommandRegistrar.registerAllCommands(context);
 
     await vscode.commands.executeCommand('dev-assistant-ai.auth');
-    await vscode.commands.executeCommand('dev-assistant-ai.openChat');    
+    await vscode.commands.executeCommand('dev-assistant-ai.openChat');
 }

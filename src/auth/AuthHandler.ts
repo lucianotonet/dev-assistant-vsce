@@ -50,7 +50,7 @@ export class AuthHandler {
 
         const appName = vscode.env.appName;
         const appType = 'vsce';
-        let url = `${DEV_ASSISTANT_SERVER}/auth/user/token?app_type=${appType}&app_name=${appName}`;
+        let url = `${DEV_ASSISTANT_SERVER}/auth/user/token?client_type=${appType}&client_name=${appName}`;
 
         this.clientId = await this.getSecret('devAssistant.client.id');
         if (this.clientId) {
@@ -81,7 +81,20 @@ export class AuthHandler {
         let clientAuthResponse: any;        
         try {
             const userToken = await this.getSecret('devAssistant.user.accessToken');
-            clientAuthResponse = await axios.post(`${DEV_ASSISTANT_SERVER}/api/auth/clients`, { clientId: this.clientId }, {
+            if (!userToken) {
+                vscode.window.showErrorMessage('Token inválido!');
+                return;
+            }
+
+            const clientId = await this.getClientId();
+            let data = { 
+                client_id: clientId,
+                client_name: 'VSCE',
+                client_type: 'vsce',
+            }
+
+            // Realiza a autenticação do cliente
+            clientAuthResponse = await axios.post(`${DEV_ASSISTANT_SERVER}/api/auth/clients/${clientId}`, data, {
                 'headers': {
                     'authorization': `Bearer ${userToken}`,
                     'contentType': 'application/json',

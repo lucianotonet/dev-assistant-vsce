@@ -309,6 +309,7 @@ export class DevAssistantChat {
         try {
             // Fetch only new messages using the 'after' parameter with the ID of the last message
             const lastMessageId = this._conversation.messages.length > 0 ? this._conversation.messages[this._conversation.messages.length - 1].id : null;
+            
             let conversation = await ApiHandler.getInstance(this._context).fetchMessages(conversationId, {
                 limit: null,
                 after: lastMessageId,
@@ -328,7 +329,7 @@ export class DevAssistantChat {
                     this._conversation.messages.push({
                         ...message,
                         // html: marked(message.content[0].text.value)
-                        html: marked(message.content ?? "ERRO AQUI!!!"),
+                        html: marked(message.content ?? "🧑🏼‍🏭 <i>calling functions...</i> 🚧"),
                     });
                 }
             });

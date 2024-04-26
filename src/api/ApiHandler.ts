@@ -103,12 +103,28 @@ export class ApiHandler {
         if (message.conversationId) {
             endpoint += message.conversationId;
         }
+
+        let messages = [
+            {
+                role: message.role,
+                content: message.content
+            }
+        ]
+
         try {
             let response;
             if (message.conversationId) {
-                response = await this.put(endpoint, message);
+                response = await this.put(endpoint, {
+                    messages: messages,
+                    clientId: message.clientId,
+                    conversationId: message.conversationId
+                });
             } else {
-                response = await this.post(endpoint, message);
+                response = await this.post(endpoint, {
+                    messages: messages,
+                    clientId: message.clientId,
+                    conversationId: message.conversationId 
+                });
             }
             return response.data;
             // Handle the API response here, for example, updating the chat view
