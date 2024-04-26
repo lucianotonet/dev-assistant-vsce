@@ -2,7 +2,7 @@
   "name": "dev-assistant-ai",
   "displayName": "Dev Assistant AI",
   "description": "Just another AI dev tool",
-  "version": "0.0.12",
+  "version": "0.0.13",
   "icon": "assets/img/icon_nobg.png",
   "publisher": "lucianotonet",
   "license": "MIT",
@@ -145,16 +145,16 @@
     }
   },
   "scripts": {
-    "vscode:prepublish": "yarn run package",
+    "vscode:prepublish": "npm run package",
     "compile": "webpack",
     "watch": "webpack --watch",
     "package": "NODE_ENV=production webpack --mode production --devtool hidden-source-map",
     "dev-package": "NODE_ENV=development webpack --mode development",
     "compile-tests": "tsc -p . --outDir out",
     "watch-tests": "tsc -p . -w --outDir out",
-    "pretest": "yarn run compile-tests && yarn run compile && yarn run lint",
+    "pretest": "npm run compile-tests && npm run compile && npm run lint",
     "test": "node ./out/test/runTest.js",
-    "posttest": "yarn run clean-tests",
+    "posttest": "npm run clean-tests",
     "lint": "eslint src --ext ts",
     "clean-tests": "rimraf out"
   },
@@ -193,7 +193,7 @@
   },
   "husky": {
     "hooks": {
-      "pre-commit": "yarn version --patch && git add package.json"
+      "pre-commit": "npm version --patch && git add package.json"
     }
   },
   "activationEvents": [
