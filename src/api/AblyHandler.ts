@@ -108,8 +108,7 @@ export class AblyHandler {
             vscode.window.showErrorMessage('Failed to initialize chat channel.');
             return;
         }
-        this.ablyChatChannel.subscribe(this.handleChatMessage.bind(this, this.context));
-        vscode.window.showInformationMessage(`Subscribed to chat channel for conversation ${conversationId}`);
+        this.ablyChatChannel.subscribe(this.handleChatMessage.bind(this, this.context));        
     }
 
     private async handleInstruction(context: vscode.ExtensionContext, message: { name: any; data: any }): Promise<void> {
