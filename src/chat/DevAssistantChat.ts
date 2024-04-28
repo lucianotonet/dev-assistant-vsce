@@ -171,7 +171,7 @@ export class DevAssistantChat {
 
                                 if (response && response.success) {
                                     this._conversation.messages = this._conversation.messages.filter(msg => msg.id !== message.messageId);
-                                    this._updateChat();
+                                    // this._updateChat();
                                     this.loadConversation(this._context, this._conversation.id)
                                 }
                                 return
@@ -224,8 +224,11 @@ export class DevAssistantChat {
                         if (nextConversationId) {
                             this._conversation.id = nextConversationId;
 
-                            this._updateChat();
+                            // await AblyHandler.getInstance(this._context).subscribeToConversation(nextConversationId);
+
+                            // this._updateChat();
                             this.loadConversation(this._context, this._conversation.id)
+
                             vscode.commands.executeCommand('dev-assistant-ai.refreshConversations');
                         } else {
                             this._conversation.id = null;
@@ -301,6 +304,7 @@ export class DevAssistantChat {
             vscode.window.showErrorMessage(`Error loading messages: ${error}`);
         }
 
+        await AblyHandler.getInstance(this._context).subscribeToConversation(conversationId);
         this._updateChat();
     }
 

@@ -98,19 +98,18 @@ export class AblyHandler {
         }
     }
 
-    async initConversationListener(conversationId: string) {
-        if (conversationId) {
-            await this.init()
+    async subscribeToConversation(conversationId: string) {
+        await this.init()
 
-            this.ablyChatChannel?.disconnect();
+        this.ablyChatChannel?.disconnect();
 
-            this.ablyChatChannel = this.ablyRealtime.channels.get(`private:devassistant.chat.${conversationId}`);
-            if (!this.ablyChatChannel) {
-                vscode.window.showErrorMessage('Failed to initialize chat channel.');
-                return;
-            }
-            this.ablyChatChannel.subscribe(this.handleChatMessage.bind(this, this.context));
+        this.ablyChatChannel = this.ablyRealtime.channels.get(`private:devassistant.chat.${conversationId}`);
+        if (!this.ablyChatChannel) {
+            vscode.window.showErrorMessage('Failed to initialize chat channel.');
+            return;
         }
+        this.ablyChatChannel.subscribe(this.handleChatMessage.bind(this, this.context));
+        vscode.window.showInformationMessage(`Subscribed to chat channel for conversation ${conversationId}`);
     }
 
     private async handleInstruction(context: vscode.ExtensionContext, message: { name: any; data: any }): Promise<void> {
