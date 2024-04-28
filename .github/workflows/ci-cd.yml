@@ -24,11 +24,23 @@ jobs:
     - name: Install vsce
       run: yarn global add vsce
 
-    - name: Auto version bump
-      run: yarn version --patch --no-git-tag-version
-
     - name: Package extension
       run: vsce package
+
+    - name: Auto version bump
+      id: version
+      run: |
+        VERSION=$(node -p "require('./package.json').version")
+        echo "Bumping version..."
+        yarn version --patch
+        NEW_VERSION=$(node -p "require('./package.json').version")
+        echo "::set-output name=newVersion::${NEW_VERSION}"
+        echo "::set-output name=version::${VERSION}"
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"\
+        git add package.json yarn.lock
+        git commit -m "v${NEW_VERSION}"
+        git tag v${NEW_VERSION}\
 
     - name: Publish to Marketplace
       uses: HaaLeo/publish-vscode-extension@v0.4.2
