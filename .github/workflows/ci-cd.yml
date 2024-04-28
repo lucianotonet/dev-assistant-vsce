@@ -31,6 +31,8 @@ jobs:
       id: version
       run: |
         echo "Bumping version..."
+        git config --global user.email "devassistant@tonet.dev"
+        git config --global user.name "Dev Assistant AI"
         yarn version --patch -m "v%v"
         NEW_VERSION=$(node -p "require('./package.json').version")
         echo "newVersion=$NEW_VERSION" >> $GITHUB_OUTPUT
