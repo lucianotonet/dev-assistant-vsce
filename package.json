@@ -191,7 +191,7 @@
   },
   "husky": {
     "hooks": {
-      "pre-commit": "yarn version --patch && git add package.json yarn.lock"
+      "pre-push": "yarn version --patch && git add package.json yarn.lock && git commit -m \"Bump version\""
     }
   },
   "activationEvents": [
