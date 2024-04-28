@@ -3,6 +3,7 @@ import { getNonce, getWebviewOptions } from '../utils/Utilities';
 import { ApiHandler } from '../api/ApiHandler';
 import { AuthHandler } from '../auth/AuthHandler';
 import { marked } from 'marked'; // Import the marked library for Markdown parsing
+import { AblyHandler } from '../api/AblyHandler';
 
 export class DevAssistantChat {
     public static instance: DevAssistantChat | undefined;
@@ -41,7 +42,7 @@ export class DevAssistantChat {
             DevAssistantChat.instance._panel?.reveal(column || DevAssistantChat.instance._panel.viewColumn);
         }
 
-        if (conversationId) {
+        if (conversationId) {            
             DevAssistantChat.instance.loadConversation(context, conversationId);
         } else {
             // reset 
@@ -225,7 +226,6 @@ export class DevAssistantChat {
 
                             this._updateChat();
                             this.loadConversation(this._context, this._conversation.id)
-
                             vscode.commands.executeCommand('dev-assistant-ai.refreshConversations');
                         } else {
                             this._conversation.id = null;
@@ -246,8 +246,7 @@ export class DevAssistantChat {
     }
 
     // Will load just the new messages if any
-    public async loadConversation(context: vscode.ExtensionContext, conversationId: string) {
-        
+    public async loadConversation(context: vscode.ExtensionContext, conversationId: string) {       
         if (this._conversation.id !== conversationId) {
             this._conversation.id = null;
             this._conversation.messages = [];
@@ -255,6 +254,7 @@ export class DevAssistantChat {
         }
 
         this._conversation.id = conversationId;
+
         this._panel?.webview.postMessage({
             command: 'updateStatus',
             status: 'in_progress',
@@ -264,14 +264,14 @@ export class DevAssistantChat {
             // Fetch only new messages using the 'after' parameter with the ID of the last message
             const lastMessageId = this._conversation.messages.length > 0 ? this._conversation.messages[this._conversation.messages.length - 1].id : null;
             
-            let conversation = await ApiHandler.getInstance(this._context).fetchMessages(conversationId, {
+            let conversation = await ApiHandler.getInstance(context).fetchMessages(conversationId, {
                 limit: null,
                 after: lastMessageId,
                 before: null
             });
             
-            // Fill the title
-            this._conversation.title = conversation.title;
+            // Fill the conversation ID
+            this._conversation.id = conversation.id;
 
             // Remove placeholders
             this._conversation.messages = this._conversation.messages.filter(message => message.id);
@@ -292,7 +292,7 @@ export class DevAssistantChat {
                 command: 'updateStatus',
                 status: 'completed'
             });
-            this._updateChat();
+            
         } catch (error) {
             this._panel?.webview.postMessage({
                 command: 'updateStatus',
@@ -300,6 +300,8 @@ export class DevAssistantChat {
             });
             vscode.window.showErrorMessage(`Error loading messages: ${error}`);
         }
+
+        this._updateChat();
     }
 
     public async processInstrucion(payload: any) {

@@ -99,9 +99,11 @@ export class ApiHandler {
     }
 
     public async sendMessage(message: {clientId: string|undefined, conversationId: string|null, content:string, role:string}): Promise<void|null> {
-        let endpoint = `${API_URL}/chat/`;
-        if (message.conversationId) {
+        var endpoint = `${API_URL}/chat/`;
+        if (message.conversationId !== null) {
             endpoint += message.conversationId;
+        } else {
+            endpoint += 'new';
         }
 
         let messages = [

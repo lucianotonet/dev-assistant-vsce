@@ -59,8 +59,6 @@ export class CommandRegistrar {
         context.subscriptions.push(
             vscode.commands.registerCommand('dev-assistant-ai.openChat', async (conversationId: string) => {                  
                 DevAssistantChat.createOrShow(context, conversationId);    
-                
-                await AblyHandler.getInstance(context).initConversationListener(conversationId);
             }),
             vscode.commands.registerCommand('dev-assistant-ai.doAction', () => {
                 if (DevAssistantChat.instance) {
