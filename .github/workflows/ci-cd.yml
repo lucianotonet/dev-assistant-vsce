@@ -36,14 +36,28 @@ jobs:
         echo "Bumping version..."
         yarn version --patch
         NEW_VERSION=$(node -p "require('./package.json').version")
-        echo "::set-output name=newVersion::${NEW_VERSION}"
-        echo "::set-output name=version::${VERSION}"
+        echo "newVersion=$NEW_VERSION" >> $GITHUB_OUTPUT
+        echo "version=$VERSION" >> $GITHUB_OUTPUT
         git add package.json yarn.lock
         git commit -m "v${NEW_VERSION}"
         git tag v${NEW_VERSION}
+        git push origin main --tags
+
+    - name: Create and publish a new release
+      id: release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      if: success() && github.ref == 'refs/heads/main'
+      with:
+        tag_name: ${{ steps.version.outputs.newVersion }}
+        release_name: Release ${{ steps.version.outputs.newVersion }}
+        draft: false
+        prerelease: false
 
     - name: Publish to Marketplace
       uses: HaaLeo/publish-vscode-extension@v0.4.2
+      if: success() && github.ref == 'refs/heads/main'
       with:
         pat: ${{ secrets.VSCE_PAT }}
         registryUrl: https://marketplace.visualstudio.com
