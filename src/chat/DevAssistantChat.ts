@@ -23,8 +23,6 @@ export class DevAssistantChat {
         }[]
     } = { id: null, title: 'New chat', messages: [] };
     private _intervalId: NodeJS.Timeout | undefined;
-    private _runs: any[] = [];
-    private _apiType: 'assistant' | 'chat' = 'chat'; // Define a API de chat como padrão
 
     public static async createOrShow(context: vscode.ExtensionContext, conversationId: string | null) {
         const column = vscode.window.activeTextEditor ? vscode.ViewColumn.Beside : undefined;
@@ -72,9 +70,6 @@ export class DevAssistantChat {
         }
 
         // Update the messages in the webview
-        if (DevAssistantChat.instance._apiType === 'assistant') {
-            DevAssistantChat.instance.startCheckingConversationStatus();
-        }
         DevAssistantChat.instance._updateChat();
     }
 
@@ -108,42 +103,6 @@ export class DevAssistantChat {
         }
     }
     
-    public startCheckingConversationStatus() {
-        if (this._apiType !== 'assistant') {
-            return;
-        }
-
-        let i = 0; // Initialize the incrementable i
-
-        const checkStatus = async () => {
-            if (this._conversation.id) {
-                const runs = await ApiHandler.getInstance(this._context).checkThreadRunsStatus(this._conversation.id);
-                this._runs = runs.data;
-
-                const status = this._runs[0].status;
-
-                if (status === 'completed') {
-                    this.loadConversation(this._context, this._conversation.id);
-                }
-
-                // vscode.window.showInformationMessage(`RUN STATUS CHECK ${i++}: ${status}`);
-                this._panel?.webview.postMessage({
-                    command: 'updateStatus',
-                    status: status
-                });
-
-                if (status !== 'in_progress' && status !== 'queued') {
-                    return;
-                }
-            }
-
-            // Wait 1 second before checking again
-            setTimeout(checkStatus, 1000);
-        };
-
-        // Start checking the status
-        checkStatus();
-    }
 
     public handleTypingIndicator(typing: boolean) {
         this._panel?.webview.postMessage({
@@ -183,9 +142,6 @@ export class DevAssistantChat {
         this._panel.onDidChangeViewState(
             e => {
                 if (e.webviewPanel.visible) {
-                    if (this._apiType === 'assistant') {
-                        this.startCheckingConversationStatus();
-                    }
                     this._updateChat(); // Update the conversation data in the webview
                 }
             },
@@ -237,7 +193,7 @@ export class DevAssistantChat {
 
                         let markedContent = await marked(message.content);
                         this._conversation.messages.push({
-                            id: null, // to show semitransparent
+                            id: null, // null to show semitransparent
                             html: markedContent,
                             role: 'user',
                             content: message.content
@@ -269,9 +225,6 @@ export class DevAssistantChat {
 
                             this._updateChat();
                             this.loadConversation(this._context, this._conversation.id)
-                            if (this._apiType === 'assistant') {
-                                this.startCheckingConversationStatus();
-                            }
 
                             vscode.commands.executeCommand('dev-assistant-ai.refreshConversations');
                         } else {
@@ -294,6 +247,7 @@ export class DevAssistantChat {
 
     // Will load just the new messages if any
     public async loadConversation(context: vscode.ExtensionContext, conversationId: string) {
+        
         if (this._conversation.id !== conversationId) {
             this._conversation.id = null;
             this._conversation.messages = [];
@@ -348,6 +302,34 @@ export class DevAssistantChat {
         }
     }
 
+    public async processInstrucion(payload: any) {
+        const { id } = payload;
+        
+        const existingMessageIndex = this._conversation.messages.findIndex(m => m.id === id);
+        const isExistingMessage = existingMessageIndex !== -1;
+        const role = payload.chunk?.role || payload.role || 'assistant';
+        let messageContent;
+        let htmlContent;
+        
+        messageContent = payload.content;
+        htmlContent = await marked(messageContent ?? '<br/>');
+        if (isExistingMessage) {
+            this._conversation.messages[existingMessageIndex].role = role;
+            this._conversation.messages[existingMessageIndex].content = messageContent;
+            this._conversation.messages[existingMessageIndex].html = htmlContent;
+        } else {
+            this._conversation.messages.push({
+                id: id,
+                content: messageContent,
+                role: role,
+                html: htmlContent
+            });
+        }
+
+        // Send an update to refresh the UI
+        this._updateChat();
+    }
+
     public async processMessage(payload: any) {
         const { id } = payload;
         
@@ -395,9 +377,11 @@ export class DevAssistantChat {
         this._updateChat();
     }
 
+    public getCurrentConversationId() {
+        return this._conversation.id;
+    }
 
-
-    private _updateChat() {
+    private async _updateChat() {
         if (this._panel?.webview) {
             this._panel.webview.postMessage({
                 command: 'updateChat',

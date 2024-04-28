@@ -1,7 +1,7 @@
 // @ts-nocheck
 // This script will be executed within the webview itself
 // It cannot access the main VS Code APIs directly.
-(function() {
+(function () {
     const vscode = acquireVsCodeApi();
     const oldState = vscode.getState();
     const chatUI = document.getElementById('chatUI');
@@ -24,91 +24,91 @@
         input.value = currentMessage;
 
     // Handle messages sent from the extension to the webview
-    window.addEventListener('message', event=>{
+    window.addEventListener('message', event => {
         const message = event.data;
         // The json data that the extension sent
         switch (message.command) {
-        case 'updateStatus':
-            var status = message.status;
-            var statusMessage = '⚪';
-            chatStatus.classList.remove('loading')
+            case 'updateStatus':
+                var status = message.status;
+                var statusMessage = '⚪';
+                chatStatus.classList.remove('loading')
 
-            // Build an appropriate message according to the status
-            switch (status) {
-            case 'in_progress':
-                chatStatusLed.innerHTML = '🟡';
-                chatStatus.classList.add('loading')
-                chatStatusFeedback.innerHTML = "Working ..."
-                form.disabled = true;
-                input.disabled = true
-                break;
-            case 'queued':
-                chatStatusLed.innerHTML = '🟠';
-                chatStatusFeedback.innerHTML = "Queued"
-                form.disabled = false;
-                input.disabled = false
-                break;
-            case 'completed':
-                chatStatusLed.innerHTML = '🟢';
-                chatStatusFeedback.innerHTML = "Ready"
-                form.disabled = false;
-                input.disabled = false
-                input.focus()
-                break;
-            case 'failed':
-                chatStatusLed.innerHTML = '🔴';
-                chatStatusFeedback.innerHTML = "Error!"
-                form.disabled = false;
-                input.disabled = false
-                break;
-            case 'typing': // New case for typing indicator
-                chatStatusLed.innerHTML = '🟡';
-                chatStatus.classList.add('loading')
-                chatStatusFeedback.innerHTML = "Dev Assistant is typing...";
-                break;
-            default:
-                chatStatusLed.innerHTML = '';
-                chatStatusFeedback.innerHTML = ""
-                form.disabled = false;
-                input.disabled = false
-                break;
-            }
-
-            break;
-
-        case 'updateChat':
-            current_conversation_id = message.conversation.id;
-            var currentQtd = messages.length
-
-            messages = message.conversation.messages;
-            chatBody.innerHTML = '';
-
-            messages.forEach(msg=>{
-                const li = document.createElement('li');
-
-                if (msg.id) {
-                    li.id = msg.id;
-                    li.classList.remove('placeholder');
-                } else {
-                    li.classList.add('placeholder');
+                // Build an appropriate message according to the status
+                switch (status) {
+                    case 'in_progress':
+                        chatStatusLed.innerHTML = '🟡';
+                        chatStatus.classList.add('loading')
+                        chatStatusFeedback.innerHTML = "Working ..."
+                        form.disabled = true;
+                        input.disabled = true
+                        break;
+                    case 'queued':
+                        chatStatusLed.innerHTML = '🟠';
+                        chatStatusFeedback.innerHTML = "Queued"
+                        form.disabled = false;
+                        input.disabled = false
+                        break;
+                    case 'completed':
+                        chatStatusLed.innerHTML = '🟢';
+                        chatStatusFeedback.innerHTML = "Ready"
+                        form.disabled = false;
+                        input.disabled = false
+                        input.focus()
+                        break;
+                    case 'failed':
+                        chatStatusLed.innerHTML = '🔴';
+                        chatStatusFeedback.innerHTML = "Error!"
+                        form.disabled = false;
+                        input.disabled = false
+                        break;
+                    case 'typing': // New case for typing indicator
+                        chatStatusLed.innerHTML = '🟡';
+                        chatStatus.classList.add('loading')
+                        chatStatusFeedback.innerHTML = "Dev Assistant is typing...";
+                        break;
+                    default:
+                        chatStatusLed.innerHTML = '';
+                        chatStatusFeedback.innerHTML = ""
+                        form.disabled = false;
+                        input.disabled = false
+                        break;
                 }
 
-                li.classList.add(msg.role);
+                break;
 
-                let name = msg.role == "assistant" ? "Dev Assistant" : "You"
-                let tokenUsage
-                if (msg.usage) {
-                    tokenUsage = `
+            case 'updateChat':
+                current_conversation_id = message.conversation.id;
+                var currentQtd = messages.length
+
+                messages = message.conversation.messages;
+                chatBody.innerHTML = '';
+
+                messages.forEach(msg => {
+                    const li = document.createElement('li');
+
+                    if (msg.id) {
+                        li.id = msg.id;
+                        li.classList.remove('placeholder');
+                    } else {
+                        li.classList.add('placeholder');
+                    }
+
+                    li.classList.add(msg.role);
+
+                    let name = msg.role == "assistant" ? "Dev Assistant" : "You"
+                    let tokenUsage
+                    if (msg.usage) {
+                        tokenUsage = `
                             <div>${msg.usage.promptTokens}</div>
                             <div>${msg.usage.completionTokens}</div>
                             <div>${msg.usage.totalTokens}</div>
                         `
-                }
-                let actions = `
+                    }
+                    let actions = `
                         <span class="delete-message" data-msg-id="${msg.id}" title="Delete this message">×</span>
                     `
 
-                li.innerHTML = `<div class="container">
+                    li.innerHTML = `<div class="container">
                         <div class="msgHeading">
                             <strong>${name}:</strong>
                             <small class="msgActions">${actions}</small>
@@ -118,52 +118,52 @@
                         </div>
                     </div>`;
 
-                chatBody.appendChild(li);
-            }
-            );
+                    chatBody.appendChild(li);
+                }
+                );
 
-            hljs.highlightAll();
+                hljs.highlightAll();
 
-            // Scroll to the bottom if new messages are added
-            if (chatUI && currentQtd != messages.length) {
-                chatUI.scrollTo({
-                    top: chatUI.scrollHeight,
-                    behavior: 'smooth'
-                });
-            }
-
-            // Tokens usage count
-            // chatTokenUsage.innerHTML = messages.length
-
-            // Add event listeners for delete actions
-            document.querySelectorAll('.delete-message').forEach(button=>{
-                button.addEventListener('click', function(event) {
-                    event.preventDefault();
-                    const messageId = this.getAttribute('data-msg-id');
-                    let li = document.getElementById(messageId)
-                    li.classList.add('placeholder')
-                    vscode.postMessage({
-                        command: 'deleteMessage',
-                        messageId: messageId
+                // Scroll to the bottom if new messages are added
+                if (chatUI && currentQtd != messages.length) {
+                    chatUI.scrollTo({
+                        top: chatUI.scrollHeight,
+                        behavior: 'smooth'
                     });
-                });
-            }
-            );
-            break;
+                }
 
-        case 'inputValue':
-            if (input)
-                input.value = message.value;
-            setTimeout(()=>input.focus(), 1);
-            break;
+                // Tokens usage count
+                // chatTokenUsage.innerHTML = messages.length
 
-        default:
-            break;
+                // Add event listeners for delete actions
+                document.querySelectorAll('.delete-message').forEach(button => {
+                    button.addEventListener('click', function (event) {
+                        event.preventDefault();
+                        const messageId = this.getAttribute('data-msg-id');
+                        let li = document.getElementById(messageId)
+                        li.classList.add('placeholder')
+                        vscode.postMessage({
+                            command: 'deleteMessage',
+                            messageId: messageId
+                        });
+                    });
+                }
+                );
+                break;
+
+            case 'inputValue':
+                if (input)
+                    input.value = message.value;
+                setTimeout(() => input.focus(), 1);
+                break;
+
+            default:
+                break;
         }
     }
     );
 
-    form?.addEventListener('submit', (event)=>{
+    form?.addEventListener('submit', (event) => {
         event.preventDefault();
 
         if (input && input.value) {

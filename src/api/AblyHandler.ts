@@ -19,7 +19,8 @@ export class AblyHandler {
     private ablyRealtime: any;
     private apiHandler: any;
     private authHandler: any;
-    private ablyChannel: any;
+    private ablyClientsChannel: any;
+    private ablyChatChannel: any;
     private context: vscode.ExtensionContext;
     private typingIndicator: vscode.StatusBarItem;
 
@@ -81,26 +82,39 @@ export class AblyHandler {
             return;
         }
 
-        const clientId = await this.authHandler.getSecret('devAssistant.client.id');
+        await this.initInstructionsListeners()
+    }
 
+    public async initInstructionsListeners() {
         if (this.ablyRealtime) {
-            this.ablyChannel = this.ablyRealtime.channels.get(`private:devassistant.clients.${clientId}`);
-            if (!this.ablyChannel) {
+            this.ablyClientsChannel = this.ablyRealtime.channels.get(`private:devassistant.clients.${await this.authHandler.getSecret('devAssistant.client.id')}`);
+            if (!this.ablyClientsChannel) {
                 vscode.window.showErrorMessage('Failed to initialize private channel.');
                 return;
             }
-
-            this.ablyChannel.subscribe(this.handleAblyMessage.bind(this, this.context));
-
-            // this.ablyChannel.subscribe(this.handleTypingIndicator.bind(this));            
-            // vscode.window.showInformationMessage('Dev Assistant is ready!');
-
+            this.ablyClientsChannel.subscribe(this.handleInstruction.bind(this, this.context));
         } else {
             vscode.window.showErrorMessage('Ably Realtime is not initialized.');
         }
     }
 
-    private async handleAblyMessage(context: vscode.ExtensionContext, message: { name: any; data: any }): Promise<void> {
+    async initConversationListener(conversationId: string) {
+        if (conversationId) {
+            await this.init()
+
+            this.ablyChatChannel?.disconnect();
+
+            this.ablyChatChannel = this.ablyRealtime.channels.get(`private:devassistant.chat.${conversationId}`);
+            if (!this.ablyChatChannel) {
+                vscode.window.showErrorMessage('Failed to initialize chat channel.');
+                return;
+            }
+            this.ablyChatChannel.subscribe(this.handleChatMessage.bind(this, this.context));
+        }
+    }
+
+    private async handleInstruction(context: vscode.ExtensionContext, message: { name: any; data: any }): Promise<void> {
+        debugger
         switch (message.name) {
             case 'instruction.created':
                 if (message.data && message.data.feedback) {
@@ -118,7 +132,7 @@ export class AblyHandler {
                 // Send to chat
                 this.typingIndicator.hide(); // Hide typing indicator when a message is received
 
-                await DevAssistantChat.instance?.processMessage(message.data);
+                await DevAssistantChat.instance?.processInstrucion(message.data);
 
                 break;
             case 'instruction.updated':
@@ -136,17 +150,31 @@ export class AblyHandler {
 
     }
 
-    private handleTypingIndicator(message: any): void {
-        if (message.data.typing) {
-            DevAssistantChat.instance?.handleTypingIndicator(true);
-        } else {
-            DevAssistantChat.instance?.handleTypingIndicator(false);
+    private async handleChatMessage(context: vscode.ExtensionContext, message: { name: any; data: any }): Promise<void> {
+        switch (message.name) {
+            case 'message.created':
+                this.handleTypingIndicator(message);
+                await DevAssistantChat.instance?.processMessage(message.data);
+                this.typingIndicator.hide(); // Hide typing indicator when a message is received
+                break;
+            case 'message.typing':
+                DevAssistantChat.instance?.handleTypingIndicator(message.data.typing);
+                break;
+            default:
+                vscode.window.showInformationMessage('Dev Assistant: \n' + 'Evento: ' + message.name);
+                this.typingIndicator.hide(); // Hide typing indicator when a message is received
+                break;
         }
+
+    }
+
+    private handleTypingIndicator(message: any): void {
+        DevAssistantChat.instance?.handleTypingIndicator(message.data.typing);
     }
 
     public async sendInstruction(instruction: string): Promise<void> {
-        if (this.ablyChannel) {
-            this.ablyChannel.publish({ data: instruction });
+        if (this.ablyClientsChannel) {
+            this.ablyClientsChannel.publish({ data: instruction });
         } else {
             vscode.window.showErrorMessage('Ably channel is not initialized.');
         }
@@ -165,5 +193,9 @@ export class AblyHandler {
             console.error('Failed to get Ably token request:', error);
             throw error;
         }
+    }
+
+    updateChatListeners() {
+        throw new Error('Method not implemented.');
     }
 }

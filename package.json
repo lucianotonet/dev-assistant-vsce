@@ -182,18 +182,16 @@
     "ably": "^1.2.48",
     "bufferutil": "^4.0.7",
     "dotenv": "^16.3.1",
-    "langchain": "^0.1.7",
     "marked": "^11.1.1",
     "node-fetch": "^3.3.2",
     "node-machine-id": "^1.1.12",
-    "openai": "^4.6.0",
     "posthog-node": "^3.1.2",
     "tailwindcss": "^3.3.6",
     "utf-8-validate": "^6.0.3"
   },
   "husky": {
     "hooks": {
-      "pre-commit": "yarn version --patch && git add package.json"
+      "pre-commit": "yarn version --patch && git add package.json yarn.lock"
     }
   },
   "activationEvents": [

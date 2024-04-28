@@ -9,8 +9,16 @@ export class CommandRegistrar {
     public static registerAllCommands(context: vscode.ExtensionContext) {
         context.subscriptions.push(
             vscode.commands.registerCommand('dev-assistant-ai.auth', async () => {
-                await AuthHandler.getInstance(context).init()
-                await AblyHandler.getInstance(context).init();
+                try {
+                    await AuthHandler.getInstance(context).init()
+                } catch (error) {
+                    vscode.window.showErrorMessage(`Erro ao inicializar autenticação: ${error}`);
+                }
+                try {
+                    await AblyHandler.getInstance(context).init();
+                } catch (error) {
+                    vscode.window.showErrorMessage(`Erro ao inicializar Ably: ${error}`);
+                }
             }),
             vscode.commands.registerCommand('dev-assistant-ai.callback', async (uri: vscode.Uri) => {
                 vscode.window.showInformationMessage('Callback...');
@@ -49,8 +57,10 @@ export class CommandRegistrar {
         vscode.window.registerTreeDataProvider('dev-assistant-ai.conversations', conversationsDataProvider);
 
         context.subscriptions.push(
-            vscode.commands.registerCommand('dev-assistant-ai.openChat', (conversationId: string) => {                
-                DevAssistantChat.createOrShow(context, conversationId);                
+            vscode.commands.registerCommand('dev-assistant-ai.openChat', async (conversationId: string) => {                  
+                DevAssistantChat.createOrShow(context, conversationId);    
+                
+                await AblyHandler.getInstance(context).initConversationListener(conversationId);
             }),
             vscode.commands.registerCommand('dev-assistant-ai.doAction', () => {
                 if (DevAssistantChat.instance) {
