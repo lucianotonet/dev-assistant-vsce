@@ -27,28 +27,6 @@ jobs:
     - name: Package extension
       run: vsce package
 
-    - name: Auto version bump
-      id: version
-      run: |
-        echo "Bumping version..."
-        git config --global user.email "devassistant@tonet.dev"
-        git config --global user.name "Dev Assistant AI"
-        yarn version --patch -m "v%v" || { echo "Error: yarn version failed"; exit 1; }
-        NEW_VERSION=$(node -p "require('./package.json').version")
-        echo "newVersion=$NEW_VERSION" >> $GITHUB_OUTPUT
-        echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
-
-    - name: Create and publish a new release
-      id: release
-      uses: actions/create-release@v1
-      if: success() && github.ref == 'refs/heads/main'
-      with:
-        tag_name: ${{ steps.version.outputs.newVersion }}
-        release_name: ${{ steps.version.outputs.newVersion }}
-        draft: false
-        prerelease: false
-        token: ${{ secrets.GH_PAT }}
-
     - name: Publish to Marketplace
       uses: HaaLeo/publish-vscode-extension@v0.4.2
       if: success() && github.ref == 'refs/heads/main'
