@@ -33,13 +33,13 @@ jobs:
         echo "Bumping version..."
         git config --global user.email "devassistant@tonet.dev"
         git config --global user.name "Dev Assistant AI"
-        yarn version --patch -m "v%v"
+        yarn version --patch -m "v%v" || { echo "Error: yarn version failed"; exit 1; }
         NEW_VERSION=$(node -p "require('./package.json').version")
         echo "newVersion=$NEW_VERSION" >> $GITHUB_OUTPUT
         echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
-        git add package.json yarn.lock
-        git commit -m "Bump version to $NEW_VERSION"
-        git push origin main --tags
+        git add package.json
+        git commit -m "Bump version to $NEW_VERSION" || { echo "Error: Git commit failed"; exit 1; }
+        git push --atomic origin main --tags || { echo "Error: Git push failed"; exit 1; }
 
     - name: Create and publish a new release
       id: release
