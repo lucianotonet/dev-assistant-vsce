@@ -44,9 +44,10 @@ jobs:
       if: success() && github.ref == 'refs/heads/main'
       with:
         tag_name: ${{ steps.version.outputs.newVersion }}
-        release_name: Release ${{ steps.version.outputs.newVersion }}
+        release_name: ${{ steps.version.outputs.newVersion }}
         draft: false
         prerelease: false
+        token: ${{ secrets.GH_PAT }}
 
     - name: Publish to Marketplace
       uses: HaaLeo/publish-vscode-extension@v0.4.2
