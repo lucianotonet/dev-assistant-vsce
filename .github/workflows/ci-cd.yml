@@ -19,7 +19,12 @@ jobs:
         node-version: 16
 
     - name: Install dependencies
-      run: yarn
+      run: |
+        git config --global user.email "devassistant@tonet.dev"
+        git config --global user.name "Dev Assistant AI"
+        echo ::set-output name=GH_TOKEN::${{ secrets.GH_PAT }}
+        git -c http.extraHeader="Authorization: Bearer $GH_TOKEN" clone https://github.com/lucianotonet/dev-assistant-vsce.git
+        yarn
 
     - name: Install vsce
       run: yarn global add vsce
@@ -43,7 +48,7 @@ jobs:
       id: release
       uses: actions/create-release@v1
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GH_TOKEN: ${{ secrets.GH_PAT }}
       if: success() && github.ref == 'refs/heads/main'
       with:
         tag_name: ${{ steps.version.outputs.newVersion }}
