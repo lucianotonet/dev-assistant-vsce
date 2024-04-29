@@ -19,12 +19,7 @@ jobs:
         node-version: 16
 
     - name: Install dependencies
-      run: |
-        git config --global user.email "devassistant@tonet.dev"
-        git config --global user.name "Dev Assistant AI"
-        echo ::set-output name=GH_TOKEN::${{ secrets.GH_PAT }}
-        git -c http.extraHeader="Authorization: Bearer $GH_TOKEN" clone https://github.com/lucianotonet/dev-assistant-vsce.git
-        yarn
+      run: yarn install
 
     - name: Install vsce
       run: yarn global add vsce
@@ -42,13 +37,10 @@ jobs:
         NEW_VERSION=$(node -p "require('./package.json').version")
         echo "newVersion=$NEW_VERSION" >> $GITHUB_OUTPUT
         echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
-        git push --atomic origin main --tags || { echo "Error: Git push failed"; exit 1; }
 
     - name: Create and publish a new release
       id: release
       uses: actions/create-release@v1
-      env:
-        GH_TOKEN: ${{ secrets.GH_PAT }}
       if: success() && github.ref == 'refs/heads/main'
       with:
         tag_name: ${{ steps.version.outputs.newVersion }}
