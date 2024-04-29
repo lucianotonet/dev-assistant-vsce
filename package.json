@@ -2,7 +2,7 @@
   "name": "dev-assistant-ai",
   "displayName": "Dev Assistant AI",
   "description": "Just another AI dev tool",
-  "version": "0.0.18",
+  "version": "0.0.19",
   "icon": "assets/img/icon_nobg.png",
   "publisher": "lucianotonet",
   "license": "MIT",
